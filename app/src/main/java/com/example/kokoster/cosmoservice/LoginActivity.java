@@ -35,17 +35,16 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess() {
                         Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(mainActivityIntent);
                         mainActivityIntent.putExtra("token", cosmoServiceClient.getToken());
-
-                        cosmoServiceClient.login(username, password, null, "http://cosmoservice.spb.ru/privoff/office.php");
+                        startActivity(mainActivityIntent);
+//                        System.out.println("LoginActivity. Token = " + cosmoServiceClient.getToken());
                     }
 
                     @Override
                     public void onError(int errorCode) {
                         // TODO: create meassage
                     }
-                }, "http://cosmoservice.spb.ru/privoff/OfficeHelper.php");
+                });
             }
         });
 
@@ -66,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
                 username = s.toString();
 
                 if (username.equals("") || password.equals("")) {
-                    loginButton.setEnabled(false);
+//                    loginButton.setEnabled(false);
                 } else {
                     loginButton.setEnabled(true);
                 }
@@ -85,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                 password = s.toString();
 
                 if (username.equals("") || password.equals("")) {
-                    loginButton.setEnabled(false);
+//                    loginButton.setEnabled(false);
                 } else {
                     loginButton.setEnabled(true);
 

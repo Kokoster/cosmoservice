@@ -28,10 +28,22 @@ import java.util.Map;
  * Created by kokoster on 13.05.16.
  */
 public class CosmoServiceClient {
+    public enum METER_DATA {
+        COLD_WATER("25046|-1"), HOT_WATER("25047|-1"), DAY_LIGHT("26678|-1"), NIGHT_LIGHT("26679|-1");
+
+        private String dataid;
+
+        METER_DATA(String dataid) {
+            this.dataid = dataid;
+        }
+
+        public String getDataid() {
+            return dataid;
+        }
+    };
+
     private RequestQueue mRequestQueue;
     private String mToken;
-
-//    private String token;
 
     // TODO: Activity or cacheDir ??
     public CosmoServiceClient(File cacheDir) {
@@ -45,27 +57,7 @@ public class CosmoServiceClient {
         Network network = new BasicNetwork(new HurlStack());
         mRequestQueue = new RequestQueue(cache, network);
 
-        token = mToken;
-    }
-
-    private void saveCookie(String token) {
-        mToken = token;
-        System.out.println("Setting Cookie");
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        CookieHandler.setDefault(cookieManager);
-
-        try {
-//            URL url = new URL("http://cosmoservice.spb.ru/");
-            URL url = new URL("http://cosmoservice.spb.ru/privoff/office.php");
-            CookieStore cookieStore = cookieManager.getCookieStore();
-            HttpCookie cookie = new HttpCookie("token", token);
-            cookieStore.add(url.toURI(), cookie);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        this.mToken = token;
     }
 
     private String parseResponse(String response) {
@@ -84,23 +76,22 @@ public class CosmoServiceClient {
         return params[1];
     }
 
-    public void login(String username, String password, final ResponseListener responseListener, String url) {
+    public void login(String username, String password, final ResponseListener responseListener) {
         mRequestQueue.start();
-//        String url = "http://cosmoservice.spb.ru/privoff/OfficeHelper.php";
+        String url = "http://cosmoservice.spb.ru/privoff/OfficeHelper.php";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         System.out.println("success");
-                        String token = parseResponse(response);
+                        mToken = parseResponse(response);
 
-                        if (token == null) {
+                        if (mToken == null) {
                             if (responseListener != null) {
                                 responseListener.onError(-1);
                             }
                         } else {
-                            saveCookie(token);
                             if (responseListener != null) {
                                 responseListener.onSuccess();
                             }
@@ -129,15 +120,73 @@ public class CosmoServiceClient {
                 return params;
             }
 
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String,String> params = new HashMap<>();
+//                params.put("Cookie", "token=" + mToken);
+//                return params;
+//            }
+        };
+
+        mRequestQueue.add(stringRequest);
+    }
+
+    public String getMeterHistory(final METER_DATA meter) {
+        mRequestQueue.start();
+        String url = "http://cosmoservice.spb.ru/privoff/requestCntrDataHistory.php";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println("success");
+                        System.out.println(response);
+
+//                        if (mToken == null) {
+//                            if (responseListener != null) {
+//                                responseListener.onError(-1);
+//                            }
+//                        } else {
+//                            if (responseListener != null) {
+//                                responseListener.onSuccess();
+//                            }
+//                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println("error");
+//                        if (responseListener != null && error != null) {
+//                            responseListener.onError(error.networkResponse.statusCode);
+//                        }
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String,String> getParams(){
+                System.out.println("In getParams");
+                Map<String,String> params = new HashMap<>();
+                System.out.println(meter.getDataid());
+                params.put("dataId", meter.getDataid());
+
+                return params;
+            }
+
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String,String> params = new HashMap<>();
-                params.put("Cookie", "token=" + mToken);
-                return params;
+                Map<String,String> headers = new HashMap<>();
+                System.out.println("In MainActivity in headers token = " + mToken);
+//                headers.put("Cookie", "tsg=s406; token=" + mToken);
+                headers.put("Cookie", "token=" + mToken);
+
+                return headers;
             }
         };
 
         mRequestQueue.add(stringRequest);
+
+        return null;
     }
 
     public String getToken() {

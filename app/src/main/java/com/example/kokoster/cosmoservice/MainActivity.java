@@ -14,16 +14,19 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
+//                System.out.println("extras = null");
                 token = null;
             } else {
+//                System.out.println("extras here");
                 token = extras.getString("token");
             }
         } else {
             token = (String) savedInstanceState.getSerializable("token");
         }
 
-        System.out.println("token");
+        System.out.println("In MainActivity token = " + token);
 
-        CosmoServiceClient cosnoServiceClient = new CosmoServiceClient(this.getCacheDir(), token);
+        CosmoServiceClient cosmoServiceClient = new CosmoServiceClient(this.getCacheDir(), token);
+        cosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATA.COLD_WATER);
     }
 }
