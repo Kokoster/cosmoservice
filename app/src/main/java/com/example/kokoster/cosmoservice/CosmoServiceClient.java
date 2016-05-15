@@ -18,6 +18,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -195,9 +197,14 @@ public class CosmoServiceClient {
         for (Element el : data) {
             Elements monthData = el.getElementsByTag("td");
             String date = monthData.get(0).text();
-            String value = monthData.get(1).text();
+            String valueString = monthData.get(1).text();
+            valueString = valueString.split(" ")[0];
 
-            allMonthsData.add(new MonthData(date, value));
+            try {
+                allMonthsData.add(new MonthData(date, new BigDecimal(valueString.replaceAll(",", ""))));
+            } catch(NumberFormatException e) {
+                System.out.println("string is: " + valueString);
+            }
         }
 
         return allMonthsData;
