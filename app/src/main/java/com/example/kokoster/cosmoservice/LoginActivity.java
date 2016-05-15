@@ -28,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
         cosmoServiceClient = new CosmoServiceClient(getCacheDir());
 
         loginButton = (Button) findViewById(com.example.kokoster.cosmoservice.R.id.login_button);
-        loginButton.setEnabled(false);
+//        loginButton.setEnabled(false);
         loginButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cosmoServiceClient.login(username, password, new ResponseListener() {
