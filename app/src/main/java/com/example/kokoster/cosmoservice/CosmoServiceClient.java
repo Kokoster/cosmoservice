@@ -48,7 +48,6 @@ public class CosmoServiceClient {
     private RequestQueue mRequestQueue;
     private String mToken;
 
-    // TODO: Activity or cacheDir ??
     public CosmoServiceClient(File cacheDir) {
         Cache cache = new DiskBasedCache(cacheDir, 1024 * 1024); // 1MB cap
         Network network = new BasicNetwork(new HurlStack());
@@ -79,8 +78,13 @@ public class CosmoServiceClient {
         return params[1];
     }
 
-    public void login(String username, String password, final ResponseListener responseListener) {
+    public void login(String username, String password, ResponseListener responseListener) {
         mRequestQueue.start();
+
+        login(username, password, responseListener, 0);
+    }
+
+    private void login(final String username, final String password, final ResponseListener responseListener, final int failsCount) {
         String url = "http://cosmoservice.spb.ru/privoff/OfficeHelper.php";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -96,11 +100,26 @@ public class CosmoServiceClient {
                             }
                         } else {
                             if (responseListener != null) {
-                                responseListener.onSuccess();
+                                getMeterHistory(CosmoServiceClient.METER_DATAID.COLD_WATER, new MeterDataResponseListener() {
+                                    @Override
+                                    public void onSuccess(METER_DATAID dataId, ArrayList<MonthData> allMonthsData) {
+                                        responseListener.onSuccess();
+                                    }
+
+                                    @Override
+                                    public void onError(METER_DATAID dataId, int errorCode) {
+                                        if (failsCount < 3)  {
+                                            System.out.println("fails count = " + Integer.toString(failsCount));
+                                            login(username, password, responseListener, failsCount + 1);
+                                        } else {
+                                            responseListener.onError(errorCode);
+                                        }
+                                    }
+                                });
                             }
                         }
                     }
-                },
+                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -135,10 +154,11 @@ public class CosmoServiceClient {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println("success");
+                        System.out.println("succeeded to get data");
                         ArrayList<MonthData> allMonthsData = parseHTMLResponse(response);
 
                         if (allMonthsData.size() == 0) {
+                            System.out.println("data size = 0");
                             if (responseListener != null) {
                                 responseListener.onError(meter, -1);
                             }
@@ -152,7 +172,7 @@ public class CosmoServiceClient {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println("error");
+                        System.out.println("got error");
                         if (responseListener != null && error != null) {
                             responseListener.onError(meter, error.networkResponse.statusCode);
                         }
@@ -161,7 +181,6 @@ public class CosmoServiceClient {
         ) {
             @Override
             protected Map<String,String> getParams(){
-                System.out.println("In getParams");
                 Map<String,String> params = new HashMap<>();
                 System.out.println(meter.getDataid());
                 params.put("dataId", meter.getDataid());
