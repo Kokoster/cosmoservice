@@ -19,7 +19,6 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +28,10 @@ import java.util.Map;
  */
 public class CosmoServiceClient {
     public enum METER_DATAID {
-        COLD_WATER("25046|-1"),
-        HOT_WATER("25047|-1"),
-        DAY_LIGHT("26678|-1"),
-        NIGHT_LIGHT("26679|-1");
+        COLD_WATER("25046"),
+        HOT_WATER("25047"),
+        DAY_LIGHT("26678"),
+        NIGHT_LIGHT("26679");
 
         private String dataid;
 
@@ -100,7 +99,7 @@ public class CosmoServiceClient {
                             }
                         } else {
                             if (responseListener != null) {
-                                getMeterHistory(CosmoServiceClient.METER_DATAID.COLD_WATER, new MeterDataResponseListener() {
+                                getMeterHistory(CosmoServiceClient.METER_DATAID.COLD_WATER, new MeterDataHistoryResponseListener() {
                                     @Override
                                     public void onSuccess(METER_DATAID dataId, ArrayList<MonthData> allMonthsData) {
                                         responseListener.onSuccess();
@@ -146,7 +145,7 @@ public class CosmoServiceClient {
         mRequestQueue.add(stringRequest);
     }
 
-    public void getMeterHistory(final METER_DATAID meter, final MeterDataResponseListener responseListener) {
+    public void getMeterHistory(final METER_DATAID meter, final MeterDataHistoryResponseListener responseListener) {
         mRequestQueue.start();
         String url = "http://cosmoservice.spb.ru/privoff/requestCntrDataHistory.php";
 
@@ -183,7 +182,7 @@ public class CosmoServiceClient {
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
                 System.out.println(meter.getDataid());
-                params.put("dataId", meter.getDataid());
+                params.put("dataId", meter.getDataid() + "|-1");
 
                 return params;
             }
@@ -227,5 +226,157 @@ public class CosmoServiceClient {
         }
 
         return allMonthsData;
+    }
+
+    String detectMeterNumber(METER_DATAID key) {
+        switch (key) {
+            case COLD_WATER:
+                return "0";
+
+            case HOT_WATER:
+                return "1";
+
+            case DAY_LIGHT:
+                return "2";
+
+            case NIGHT_LIGHT:
+                return "3";
+        }
+
+        return null;
+    }
+
+    private void saveCurrentMetersData(final HashMap<METER_DATAID, String> meterIdMap,
+                                       final HashMap<METER_DATAID, BigDecimal> metersDataMap) {
+        mRequestQueue.start();
+        String url = "http://cosmoservice.spb.ru/privoff/obr.php";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String, String> params = new HashMap<>();
+                final String sumpostStr = "sumpost";
+                final String markSaveStr = "markSave";
+                final String markDeleteStr = "markDelete";
+                final String counterDataIdStr = "CounterDataId";
+
+                String meterNumberStr = "";
+                for (METER_DATAID key : metersDataMap.keySet()) {
+                    meterNumberStr = detectMeterNumber(key);
+
+                    BigDecimal value = metersDataMap.get(key);
+
+                    if (value.equals(0)) {
+                        params.put(sumpostStr + meterNumberStr, "");
+                        params.put(markSaveStr + meterNumberStr, "0");
+                    } else {
+                        params.put(sumpostStr + meterNumberStr, value.toString());
+                        params.put(markSaveStr + meterNumberStr, "1");
+                    }
+
+                    params.put(markDeleteStr + meterNumberStr, "0");
+                    params.put(counterDataIdStr + meterNumberStr, meterIdMap.get(key));
+                }
+
+                return params;
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                System.out.println("In MainActivity in headers token = " + mToken);
+                headers.put("Cookie", "token=" + mToken);
+
+                return headers;
+            }
+        };
+
+        mRequestQueue.add(stringRequest);
+    }
+
+    public void saveCurrentMetersData(final HashMap<METER_DATAID, BigDecimal> metersData) {
+        retrieveMeterDataId(new MeterDataIdResponseListener() {
+            @Override
+            public void onSuccess(HashMap<METER_DATAID, String> meterId) {
+                saveCurrentMetersData(meterId, metersData);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+
+            }
+        });
+    }
+
+    private void retrieveMeterDataId(final MeterDataIdResponseListener listener) {
+        mRequestQueue.start();
+        String url = "http://cosmoservice.spb.ru/privoff/office.php";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                listener.onSuccess(extractMeterDataId(response));
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                listener.onError(error.networkResponse.statusCode);
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                System.out.println("In MainActivity in headers token = " + mToken);
+                headers.put("Cookie", "token=" + mToken);
+
+                return headers;
+            }
+        };
+
+
+        mRequestQueue.add(stringRequest);
+    }
+
+    private HashMap<METER_DATAID, String> extractMeterDataId(String response) {
+        Document doc = Jsoup.parse(response);
+
+        HashMap<METER_DATAID, String> meterDataId = new HashMap<>();
+
+        Elements data = doc.getElementsByClass("CounterDataId0");
+        for (Element el : data) {
+            meterDataId.put(METER_DATAID.COLD_WATER, el.attr("value"));
+        }
+
+        data = doc.getElementsByClass("CounterDataId1");
+        for (Element el : data) {
+            meterDataId.put(METER_DATAID.HOT_WATER, el.attr("value"));
+        }
+
+        data = doc.getElementsByClass("CounterDataId2");
+        for (Element el : data) {
+            meterDataId.put(METER_DATAID.DAY_LIGHT, el.attr("value"));
+        }
+
+        data = doc.getElementsByClass("CounterDataId3");
+        for (Element el : data) {
+            meterDataId.put(METER_DATAID.NIGHT_LIGHT, el.attr("value"));
+        }
+
+        return meterDataId;
+    }
+
+    private interface MeterDataIdResponseListener {
+        public void onSuccess(HashMap<METER_DATAID, String> meterId);
+        public void onError(int errorCode);
     }
 }

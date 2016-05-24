@@ -4,7 +4,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, responseListener);
     }
 
-    private class Listener implements MeterDataResponseListener {
+    private class Listener implements MeterDataHistoryResponseListener {
         @Override
         public void onSuccess(CosmoServiceClient.METER_DATAID dataId, ArrayList<MonthData> allMonths) {
             mMeterData.put(dataId, allMonths);
@@ -58,6 +57,14 @@ public class MainActivity extends AppCompatActivity {
             if (allMeterDataRetreived()) {
                 System.out.println("in MainActivity success");
                 updateView();
+
+//                HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> data = new HashMap<>();
+//                data.put(CosmoServiceClient.METER_DATAID.COLD_WATER, new BigDecimal(111));
+//                data.put(CosmoServiceClient.METER_DATAID.HOT_WATER, new BigDecimal(0));
+//                data.put(CosmoServiceClient.METER_DATAID.DAY_LIGHT, new BigDecimal(0));
+//                data.put(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, new BigDecimal(0));
+//
+//                mCosmoServiceClient.saveCurrentMetersData(data);
             }
         }
 
