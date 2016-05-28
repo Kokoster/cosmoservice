@@ -318,6 +318,68 @@ public class CosmoServiceClient {
         });
     }
 
+    private HashMap<METER_DATAID, BigDecimal> extractMetersCurrentData(String response) {
+        Document doc = Jsoup.parse(response);
+
+        HashMap<METER_DATAID, BigDecimal> currentMetersData = new HashMap<>();
+
+        Elements data = doc.getElementsByClass("sumpost0");
+        for (Element el : data) {
+            String valueStr = el.attr("value");
+            BigDecimal value = new BigDecimal(valueStr.replaceAll(",", "")).setScale(0, BigDecimal.ROUND_HALF_UP);
+            currentMetersData.put(METER_DATAID.COLD_WATER,value);
+        }
+
+        data = doc.getElementsByClass("sumpost1");
+        for (Element el : data) {
+            String valueStr = el.attr("value");
+            BigDecimal value = new BigDecimal(valueStr.replaceAll(",", "")).setScale(0, BigDecimal.ROUND_HALF_UP);
+            currentMetersData.put(METER_DATAID.HOT_WATER,value);
+        }
+
+        data = doc.getElementsByClass("sumpost1");
+        for (Element el : data) {
+            String valueStr = el.attr("value");
+            BigDecimal value = new BigDecimal(valueStr.replaceAll(",", "")).setScale(0, BigDecimal.ROUND_HALF_UP);
+            currentMetersData.put(METER_DATAID.DAY_LIGHT,value);
+        }
+
+        data = doc.getElementsByClass("sumpost3");
+        for (Element el : data) {
+            String valueStr = el.attr("value");
+            BigDecimal value = new BigDecimal(valueStr.replaceAll(",", "")).setScale(0, BigDecimal.ROUND_HALF_UP);
+            currentMetersData.put(METER_DATAID.NIGHT_LIGHT,value);
+        }
+
+        return currentMetersData;
+    }
+
+    public void retrieveCurrentMetersData(final MetersCurrentDataListener listener) {
+        mRequestQueue.start();
+        String url = "http://cosmoservice.spb.ru/privoff/office.php";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                listener.onSuccess(extractMetersCurrentData(response));
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                listener.onError(error.networkResponse.statusCode);
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                System.out.println("In MainActivity in headers token = " + mToken);
+                headers.put("Cookie", "token=" + mToken);
+
+                return headers;
+            }
+        };
+    }
+
     private void retrieveMeterDataId(final MeterDataIdResponseListener listener) {
         mRequestQueue.start();
         String url = "http://cosmoservice.spb.ru/privoff/office.php";

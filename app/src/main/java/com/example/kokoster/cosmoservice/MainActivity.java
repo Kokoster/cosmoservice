@@ -1,12 +1,16 @@
 package com.example.kokoster.cosmoservice;
 
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,11 +19,29 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
     private CosmoServiceClient mCosmoServiceClient;
     private HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> mMeterData;
+    private Toolbar toolbar;
+
+    private BottomSheetBehavior mBottomSheetBehavior;
+    private Button mButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.example.kokoster.cosmoservice.R.layout.activity_main);
+
+        View bottomSheetView = findViewById( R.id.bottom_sheet );
+        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView);
+
+        mButton = (Button) findViewById(R.id.edit_button);
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         String token;
         if (savedInstanceState == null) {
@@ -56,6 +78,17 @@ public class MainActivity extends AppCompatActivity {
 
             if (allMeterDataRetreived()) {
                 System.out.println("in MainActivity success");
+                mCosmoServiceClient.retrieveCurrentMetersData(new MetersCurrentDataListener() {
+                    @Override
+                    public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> metersCurrentData) {
+
+                    }
+
+                    @Override
+                    public void onError(int errorCode) {
+
+                    }
+                });
                 updateView();
 
 //                HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> data = new HashMap<>();
