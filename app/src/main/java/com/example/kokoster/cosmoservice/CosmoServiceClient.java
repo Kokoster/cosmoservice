@@ -18,6 +18,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import java.util.Map;
 /**
  * Created by kokoster on 13.05.16.
  */
-public class CosmoServiceClient {
+public class CosmoServiceClient implements Serializable {
     public enum METER_DATAID {
         COLD_WATER("25046"),
         HOT_WATER("25047"),
