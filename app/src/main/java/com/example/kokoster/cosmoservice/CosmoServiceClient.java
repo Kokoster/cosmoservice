@@ -183,7 +183,11 @@ public class CosmoServiceClient implements Serializable {
                     public void onErrorResponse(VolleyError error) {
                         System.out.println("got error");
                         if (responseListener != null && error != null) {
-                            responseListener.onError(meter, error.networkResponse.statusCode);
+                            if (error.networkResponse != null) {
+                                responseListener.onError(meter, error.networkResponse.statusCode);
+                            } else {
+                                responseListener.onError(meter, -1);
+                            }
                         }
                     }
                 }
