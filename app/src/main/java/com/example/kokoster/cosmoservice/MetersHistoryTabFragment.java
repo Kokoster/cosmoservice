@@ -1,7 +1,6 @@
 package com.example.kokoster.cosmoservice;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,17 +62,17 @@ public class MetersHistoryTabFragment extends Fragment {
 
             if (allMeterDataRetreived()) {
                 System.out.println("in MainActivity success");
-                mCosmoServiceClient.retrieveCurrentMetersData(new MetersCurrentDataListener() {
-                    @Override
-                    public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> metersCurrentData) {
-
-                    }
-
-                    @Override
-                    public void onError(int errorCode) {
-
-                    }
-                });
+//                mCosmoServiceClient.retrieveCurrentMetersData(new MetersCurrentDataListener() {
+//                    @Override
+//                    public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> metersCurrentData) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(int errorCode) {
+//
+//                    }
+//                });
 
                 updateView();
 

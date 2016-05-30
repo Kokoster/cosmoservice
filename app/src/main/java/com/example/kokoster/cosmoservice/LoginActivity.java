@@ -9,6 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+
 public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private EditText loginEditText;
@@ -27,8 +30,21 @@ public class LoginActivity extends AppCompatActivity {
         // TODO: cosmoServiceClient -> onClick ??
         cosmoServiceClient = new CosmoServiceClient(getCacheDir());
 
+        loginEditText = (EditText) findViewById(com.example.kokoster.cosmoservice.R.id.login);
+        passwordEditText = (EditText) findViewById(com.example.kokoster.cosmoservice.R.id.password);
+
+        loginEditText.setText("172");
+        passwordEditText.setText("tM3kpRUX7G2b");
+
+        username = loginEditText.getText().toString();
+        password = passwordEditText.getText().toString();
+
+
         loginButton = (Button) findViewById(com.example.kokoster.cosmoservice.R.id.login_button);
-//        loginButton.setEnabled(false);
+        if (loginEditText.getText().equals("") && passwordEditText.getText().equals("")) {
+            loginButton.setEnabled(false);
+        }
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 cosmoServiceClient.login(username, password, new ResponseListener() {
@@ -48,11 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        loginEditText = (EditText) findViewById(com.example.kokoster.cosmoservice.R.id.login);
-        passwordEditText = (EditText) findViewById(com.example.kokoster.cosmoservice.R.id.password);
-        username = new String();
-        password = new String();
-
         loginEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -65,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
                 username = s.toString();
 
                 if (username.equals("") || password.equals("")) {
-//                    loginButton.setEnabled(false);
+                    loginButton.setEnabled(false);
                 } else {
                     loginButton.setEnabled(true);
                 }
@@ -84,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                 password = s.toString();
 
                 if (username.equals("") || password.equals("")) {
-//                    loginButton.setEnabled(false);
+                    loginButton.setEnabled(false);
                 } else {
                     loginButton.setEnabled(true);
 

@@ -125,7 +125,10 @@ public class CosmoServiceClient implements Serializable {
                     public void onErrorResponse(VolleyError error) {
                         System.out.println("error");
                         if (responseListener != null && error != null) {
-                            responseListener.onError(error.networkResponse.statusCode);
+                            if (error.networkResponse == null) {
+                                responseListener.onError(-1);
+                            } else
+                                responseListener.onError(error.networkResponse.statusCode);
                         }
                     }
                 }
@@ -134,8 +137,8 @@ public class CosmoServiceClient implements Serializable {
             protected Map<String,String> getParams(){
                 System.out.println("In getParams");
                 Map<String,String> params = new HashMap<>();
-                params.put("login", "172");
-                params.put("password", "tM3kpRUX7G2b");
+                params.put("login", username);
+                params.put("password", password);
                 params.put("tsgcode", "s406");
                 params.put("method", "login");
 
@@ -338,7 +341,7 @@ public class CosmoServiceClient implements Serializable {
             currentMetersData.put(METER_DATAID.HOT_WATER,value);
         }
 
-        data = doc.getElementsByClass("sumpost1");
+        data = doc.getElementsByClass("sumpost2");
         for (Element el : data) {
             String valueStr = el.attr("value");
             BigDecimal value = new BigDecimal(valueStr.replaceAll(",", "")).setScale(0, BigDecimal.ROUND_HALF_UP);
@@ -356,7 +359,7 @@ public class CosmoServiceClient implements Serializable {
     }
 
     public void retrieveCurrentMetersData(final MetersCurrentDataListener listener) {
-        mRequestQueue.start();
+//        mRequestQueue.start();
         String url = "http://cosmoservice.spb.ru/privoff/office.php";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -379,6 +382,8 @@ public class CosmoServiceClient implements Serializable {
                 return headers;
             }
         };
+
+        mRequestQueue.add(stringRequest);
     }
 
     private void retrieveMeterDataId(final MeterDataIdResponseListener listener) {
