@@ -9,9 +9,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
+import android.widget.ScrollView;
 
 public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
