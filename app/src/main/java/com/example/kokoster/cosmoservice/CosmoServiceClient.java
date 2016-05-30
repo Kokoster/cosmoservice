@@ -251,19 +251,24 @@ public class CosmoServiceClient implements Serializable {
     }
 
     private void saveCurrentMetersData(final HashMap<METER_DATAID, String> meterIdMap,
-                                       final HashMap<METER_DATAID, BigDecimal> metersDataMap) {
+                                       final HashMap<METER_DATAID, BigDecimal> metersDataMap,
+                                       final SaveDataListener listener) {
         mRequestQueue.start();
         String url = "http://cosmoservice.spb.ru/privoff/obr.php";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-
+                listener.onSuccess();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                if (error.networkResponse != null) {
+                    listener.onError(error.networkResponse.statusCode);
+                } else {
+                    listener.onError(-1);
+                }
             }
         }) {
             @Override
@@ -280,15 +285,16 @@ public class CosmoServiceClient implements Serializable {
 
                     BigDecimal value = metersDataMap.get(key);
 
-                    if (value.equals(0)) {
+                    if (value.equals(new BigDecimal(0))) {
                         params.put(sumpostStr + meterNumberStr, "");
                         params.put(markSaveStr + meterNumberStr, "0");
+                        params.put(markDeleteStr + meterNumberStr, "1");
                     } else {
                         params.put(sumpostStr + meterNumberStr, value.toString());
                         params.put(markSaveStr + meterNumberStr, "1");
+                        params.put(markDeleteStr + meterNumberStr, "0");
                     }
 
-                    params.put(markDeleteStr + meterNumberStr, "0");
                     params.put(counterDataIdStr + meterNumberStr, meterIdMap.get(key));
                 }
 
@@ -308,11 +314,11 @@ public class CosmoServiceClient implements Serializable {
         mRequestQueue.add(stringRequest);
     }
 
-    public void saveCurrentMetersData(final HashMap<METER_DATAID, BigDecimal> metersData) {
+    public void saveCurrentMetersData(final HashMap<METER_DATAID, BigDecimal> metersData, final SaveDataListener listener) {
         retrieveMeterDataId(new MeterDataIdResponseListener() {
             @Override
             public void onSuccess(HashMap<METER_DATAID, String> meterId) {
-                saveCurrentMetersData(meterId, metersData);
+                saveCurrentMetersData(meterId, metersData, listener);
             }
 
             @Override

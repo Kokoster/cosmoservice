@@ -1,5 +1,6 @@
 package com.example.kokoster.cosmoservice;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private CosmoServiceClient cosmoServiceClient;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +43,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         loginButton = (Button) findViewById(com.example.kokoster.cosmoservice.R.id.login_button);
-        if (loginEditText.getText().equals("") && passwordEditText.getText().equals("")) {
+        if (loginEditText.getText().toString().equals("") && passwordEditText.getText().toString().equals("")) {
             loginButton.setEnabled(false);
         }
 

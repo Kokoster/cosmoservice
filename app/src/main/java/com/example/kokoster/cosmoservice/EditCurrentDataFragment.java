@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import java.math.BigDecimal;
@@ -28,6 +29,8 @@ public class EditCurrentDataFragment extends Fragment {
     BigDecimal mDayLightValue;
     BigDecimal mNightLightValue;
 
+    Button saveButton;
+
     public static EditCurrentDataFragment newInstance(CosmoServiceClient cosmoServiceClient) {
         Bundle args = new Bundle();
         args.putSerializable(COSMO_SERVICE_OBJECT_KEY, cosmoServiceClient);
@@ -35,6 +38,15 @@ public class EditCurrentDataFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    private void updateMetersData(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> currentMetersData) {
+        mColdWaterValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.COLD_WATER);
+        mHotWaterValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.HOT_WATER);
+        mDayLightValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT);
+        mNightLightValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT);
+
+        updateViews();
     }
 
     @Override
@@ -47,12 +59,7 @@ public class EditCurrentDataFragment extends Fragment {
         mCosmoServiceClient.retrieveCurrentMetersData(new MetersCurrentDataListener() {
             @Override
             public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> currentMetersData) {
-                mColdWaterValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.COLD_WATER);
-                mHotWaterValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.HOT_WATER);
-                mDayLightValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT);
-                mNightLightValue = currentMetersData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT);
-
-                updateViews();
+                updateMetersData(currentMetersData);
             }
 
             @Override
@@ -73,6 +80,69 @@ public class EditCurrentDataFragment extends Fragment {
         mNightLightEditText = (EditText) editView.findViewById(R.id.night_light_edit);
 
         updateViews();
+
+        saveButton = (Button) editView.findViewById(R.id.save_button);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCosmoServiceClient.saveCurrentMetersData(getEditTextData(), new SaveDataListener() {
+                    @Override
+                    public void onSuccess() {
+                        mCosmoServiceClient.retrieveCurrentMetersData(new MetersCurrentDataListener() {
+                            @Override
+                            public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> currentMetersData) {
+                                updateMetersData(currentMetersData);
+                            }
+
+                            @Override
+                            public void onError(int errorCode) {
+                                System.out.println("retrieveCurrentMetersData returned with error code " + Integer.toString(errorCode));
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(int errorCode) {
+                        System.out.println("saveCurrentMetersData failed with error " + Integer.toString(errorCode));
+                    }
+                });
+            }
+
+            private HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> getEditTextData() {
+                HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> data = new HashMap<>();
+
+                String coldWaterData = mColdWaterEditText.getText().toString();
+                String hotWaterData = mHotWaterEditText.getText().toString();
+                String dayLightData = mDayLightEditText.getText().toString();
+                String nightLightData = mNightLightEditText.getText().toString();
+
+                if (!coldWaterData.equals("")) {
+                    data.put(CosmoServiceClient.METER_DATAID.COLD_WATER, new BigDecimal(coldWaterData));
+                } else {
+                    data.put(CosmoServiceClient.METER_DATAID.COLD_WATER, new BigDecimal(0));
+                }
+
+                if (!hotWaterData.equals("")) {
+                    data.put(CosmoServiceClient.METER_DATAID.HOT_WATER, new BigDecimal(hotWaterData));
+                } else {
+                    data.put(CosmoServiceClient.METER_DATAID.HOT_WATER, new BigDecimal(0));
+                }
+
+                if (!dayLightData.equals("")) {
+                    data.put(CosmoServiceClient.METER_DATAID.DAY_LIGHT, new BigDecimal(dayLightData));
+                } else {
+                    data.put(CosmoServiceClient.METER_DATAID.DAY_LIGHT, new BigDecimal(0));
+                }
+
+                if (!nightLightData.equals("")) {
+                    data.put(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, new BigDecimal(nightLightData));
+                } else {
+                    data.put(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, new BigDecimal(0));
+                }
+
+                return data;
+            }
+        });
 
         // Inflate the layout for this fragment
         return editView;
