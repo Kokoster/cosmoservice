@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -72,12 +73,25 @@ public class EditCurrentDataFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View editView = inflater.inflate(R.layout.fragment_edit_current, container, false);
+        final View editView = inflater.inflate(R.layout.fragment_edit_current, container, false);
 
         mColdWaterEditText = (EditText) editView.findViewById(R.id.cold_water_edit);
         mHotWaterEditText = (EditText) editView.findViewById(R.id.hot_water_edit);
         mDayLightEditText = (EditText) editView.findViewById(R.id.day_light_edit);
         mNightLightEditText = (EditText) editView.findViewById(R.id.night_light_edit);
+
+        mCosmoServiceClient.retrieveCurrentMonth(new MonthRequestListener() {
+            @Override
+            public void onSuccess(String month) {
+                TextView currentMonthTextView = (TextView) editView.findViewById(R.id.current_month);
+                currentMonthTextView.setText(month);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                System.out.println("retrieveCurrentMonth failed with " + Integer.toString(errorCode) + " error code");
+            }
+        });
 
         updateViews();
 

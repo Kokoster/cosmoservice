@@ -52,12 +52,18 @@ public class CosmoServiceClient implements Serializable {
         Cache cache = new DiskBasedCache(cacheDir, 1024 * 1024); // 1MB cap
         Network network = new BasicNetwork(new HurlStack());
         mRequestQueue = new RequestQueue(cache, network);
+
+        // if something crashes try to find bug here :)
+        mRequestQueue.start();
     }
 
     public CosmoServiceClient(File cacheDir, String token) {
         Cache cache = new DiskBasedCache(cacheDir, 1024 * 1024); // 1MB cap
         Network network = new BasicNetwork(new HurlStack());
         mRequestQueue = new RequestQueue(cache, network);
+
+        // if something crashes try to find bug here :)
+        mRequestQueue.start();
 
         this.mToken = token;
     }
@@ -362,6 +368,49 @@ public class CosmoServiceClient implements Serializable {
         }
 
         return currentMetersData;
+    }
+
+    private String extractCurrentMonth(String response) {
+        Document doc = Jsoup.parse(response);
+        Elements data = doc.getElementsByClass("zzag");
+        for (Element el : data) {
+            if (el.text().contains("Ввод показаний за")) {
+                return el.text().substring(18);
+            }
+        }
+
+        return null;
+    }
+
+    public void retrieveCurrentMonth(final MonthRequestListener listener) {
+        String url = "http://cosmoservice.spb.ru/privoff/office.php";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                listener.onSuccess(extractCurrentMonth(response));
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error.networkResponse != null) {
+                    listener.onError(error.networkResponse.statusCode);
+                } else {
+                    listener.onError(-1);
+                }
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                System.out.println("In MainActivity in headers token = " + mToken);
+                headers.put("Cookie", "token=" + mToken);
+
+                return headers;
+            }
+        };
+
+        mRequestQueue.add(stringRequest);
     }
 
     public void retrieveCurrentMetersData(final MetersCurrentDataListener listener) {
