@@ -9,5 +9,6 @@
     <color name="colorButtonText">#FFFFFF</color>>
     <color name="icons">#FFFFFF</color>
     <color name="colorBackground">@android:color/white</color>
-    <color name="divider">#B6B6B6</color>
+    <color name="divider">#b6b6b6</color>
+    <color name="colorButtonDisabled">#dac1bfbf</color>
 </resources>

@@ -6,10 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ScrollView;
+import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
@@ -102,5 +104,32 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+
+        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    loginButton.performClick();
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+//        LoginLinearLayout loginLayout = ((LoginLinearLayout)findViewById(R.id.login_layout));
+//        if (loginLayout != null) {
+//            loginLayout.setOnSoftKeyboardListener(new LoginLinearLayout.OnSoftKeyboardListener() {
+//                @Override
+//                public void onShown() {
+//                    findViewById(R.id.cosmologo_image).setVisibility(View.GONE);
+//                }
+//
+//                @Override
+//                public void onHidden() {
+//                    findViewById(R.id.cosmologo_image).setVisibility(View.VISIBLE);
+//                }
+//            });
+//        }
     }
 }

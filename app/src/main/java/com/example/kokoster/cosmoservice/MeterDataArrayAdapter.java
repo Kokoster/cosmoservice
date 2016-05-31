@@ -16,8 +16,8 @@ public class MeterDataArrayAdapter extends ArrayAdapter {
     private Context context;
     private final ArrayList<ArrayList<String>> historyData;
 
-    public MeterDataArrayAdapter(Context context, int viewResourseId, ArrayList<ArrayList<String>> data) {
-        super(context, viewResourseId, data);
+    public MeterDataArrayAdapter(Context context, int viewResourceId, ArrayList<ArrayList<String>> data) {
+        super(context, viewResourceId, data);
         this.context = context;
         this.historyData = data;
     }

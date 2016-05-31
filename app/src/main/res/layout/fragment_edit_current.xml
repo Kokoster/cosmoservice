@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scroll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="500dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Холодная вода"
+                android:id="@+id/cold_water_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="false"
+                android:layout_marginLeft="24dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginRight="24dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center|left"
+                android:textSize="16sp"
+                android:height="45dp"
+                android:layout_below="@+id/current_month" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Горячая вода"
+                android:id="@+id/hot_water_label"
+                android:layout_below="@+id/cold_water_label"
+                android:layout_alignStart="@+id/cold_water_label"
+                android:layout_alignLeft="@+id/cold_water_label"
+                android:layout_marginRight="24dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center|left"
+                android:textSize="16sp"
+                android:height="45dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="День"
+                android:id="@+id/day_light_label"
+                android:layout_alignStart="@+id/hot_water_label"
+                android:layout_below="@+id/hot_water_label"
+                android:layout_alignLeft="@+id/hot_water_label"
+                android:gravity="center|left"
+                android:layout_marginBottom="16dp"
+                android:layout_marginRight="24dp"
+                android:textSize="16sp"
+                android:height="45dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ночь"
+                android:id="@+id/night_light_label"
+                android:layout_alignStart="@+id/day_light_label"
+                android:layout_below="@+id/day_light_label"
+                android:layout_alignLeft="@+id/day_light_label"
+                android:gravity="center|left"
+                android:textSize="16sp"
+                android:height="45dp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cold_water_edit"
+                android:layout_alignBottom="@+id/cold_water_label"
+                android:layout_toRightOf="@+id/cold_water_label"
+                android:layout_toEndOf="@+id/cold_water_label"
+                android:layout_marginLeft="41dp"
+                android:layout_marginStart="41dp"
+                android:layout_alignTop="@+id/cold_water_label"
+                android:width="100dp"
+                android:textColor="@android:color/primary_text_light"
+                android:textSize="16sp"
+                android:inputType="numberDecimal" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/hot_water_edit"
+                android:layout_below="@+id/cold_water_edit"
+                android:layout_toRightOf="@+id/hot_water_label"
+                android:layout_toEndOf="@+id/cold_water_label"
+                android:layout_alignTop="@+id/hot_water_label"
+                android:layout_alignLeft="@+id/cold_water_edit"
+                android:layout_alignBottom="@+id/hot_water_label"
+                android:layout_alignRight="@+id/cold_water_edit"
+                android:textSize="16sp"
+                android:inputType="numberDecimal"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/day_light_edit"
+                android:layout_below="@+id/hot_water_edit"
+                android:layout_toRightOf="@+id/day_light_label"
+                android:layout_toEndOf="@+id/cold_water_label"
+                android:layout_alignTop="@+id/day_light_label"
+                android:layout_alignLeft="@+id/hot_water_edit"
+                android:layout_alignBottom="@+id/day_light_label"
+                android:layout_alignRight="@+id/hot_water_edit"
+                android:textSize="16sp"
+                android:inputType="numberDecimal" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/night_light_edit"
+                android:layout_below="@+id/day_light_edit"
+                android:layout_toRightOf="@+id/night_light_label"
+                android:layout_toEndOf="@+id/cold_water_label"
+                android:layout_alignTop="@+id/night_light_label"
+                android:layout_alignLeft="@+id/day_light_edit"
+                android:layout_alignBottom="@+id/night_light_label"
+                android:layout_alignRight="@+id/day_light_edit"
+                android:textSize="16sp"
+                android:inputType="numberDecimal" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:background="@drawable/custom_button"
+                android:textColor="@color/colorButtonText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="сохранить"
+                android:id="@+id/save_button"
+                android:layout_centerVertical="true"
+                android:textSize="16sp"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentEnd="false"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="100dp"
+                android:layout_marginTop="24dp"
+                android:layout_below="@+id/night_light_label"
+                android:layout_marginLeft="100dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/current_month"
+                android:layout_alignParentBottom="false"
+                android:layout_marginLeft="24dp"
+                android:layout_marginBottom="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginTop="24dp"
+                android:textSize="32sp" />
+        </RelativeLayout>
+     </ScrollView>
+</LinearLayout>

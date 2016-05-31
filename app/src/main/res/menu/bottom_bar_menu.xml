@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="56dp">
+    <item
+        android:id="@+id/meters_history"
+        android:title="История"
+        android:icon="@drawable/ic_history_black_24dp"
+        android:textSize="14sp" />
+
+    <item
+        android:id="@+id/edit_current"
+        android:title="Текущие"
+        android:textSize="14sp"
+        android:icon="@drawable/ic_mode_edit_black_24dp"/>
+
+</menu>
