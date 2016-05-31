@@ -71,25 +71,49 @@
                     android:height="72dp" />
             </android.support.design.widget.TextInputLayout>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Войти"
-                android:id="@+id/login_button"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="30dp"
+            <RelativeLayout
                 android:layout_below="@+id/password_text_input_layout"
                 android:layout_alignLeft="@+id/password_text_input_layout"
                 android:layout_alignRight="@+id/password_text_input_layout"
-                android:height="48dp"
-                android:textSize="14sp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:background="@drawable/custom_button"
-                android:textColor="@color/colorButtonText"
-                android:layout_marginBottom="30dp">
-               </Button>
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Войти"
+                    android:id="@+id/login_button"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="30dp"
+                    android:height="48dp"
+                    android:textSize="14sp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="@drawable/custom_button"
+                    android:textColor="@color/colorButtonText"
+                    android:layout_marginBottom="30dp"/>
+
+                <ProgressBar
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/login_progress_bar"
+                    android:layout_gravity="right"
+                    android:visibility="invisible"
+                    android:indeterminate="true"
+                    android:layout_alignTop="@+id/login_button"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:minHeight="30dp"
+                    android:minWidth="30dp"
+                    android:maxHeight="30dp"
+                    android:maxWidth="30dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp">
+                </ProgressBar>
+
+            </RelativeLayout>
         </RelativeLayout>
     </ScrollView>
 </com.example.kokoster.cosmoservice.LoginLinearLayout>

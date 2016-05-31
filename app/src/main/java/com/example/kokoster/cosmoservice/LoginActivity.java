@@ -11,12 +11,14 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private EditText loginEditText;
     private EditText passwordEditText;
+    private ProgressBar mProgressBar;
 
     private String username;
     private String password;
@@ -31,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // TODO: cosmoServiceClient -> onClick ??
         cosmoServiceClient = new CosmoServiceClient(getCacheDir());
+
+        mProgressBar = (ProgressBar) findViewById(R.id.login_progress_bar);
 
         loginEditText = (EditText) findViewById(com.example.kokoster.cosmoservice.R.id.login);
         passwordEditText = (EditText) findViewById(com.example.kokoster.cosmoservice.R.id.password);
@@ -49,6 +53,11 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                loginButton.setEnabled(false);
+                loginEditText.setEnabled(false);
+                passwordEditText.setEnabled(false);
+
                 cosmoServiceClient.login(username, password, new ResponseListener() {
                     @Override
                     public void onSuccess() {
@@ -60,6 +69,10 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(int errorCode) {
+                        mProgressBar.setVisibility(View.INVISIBLE);
+                        loginButton.setEnabled(true);
+                        loginEditText.setEnabled(true);
+                        passwordEditText.setEnabled(true);
                         // TODO: create meassage
                     }
                 });
