@@ -23,6 +23,9 @@ public class EditCurrentDataFragment extends Fragment {
     private View mEditView = null;
 
     private ProgressBar mEditCurrentProgressBar;
+    private ProgressBar mSaveProgressBar;
+    private TextView mErrorText;
+
     private CosmoServiceClient mCosmoServiceClient = null;
     private String mCurrentMonth = "";
 
@@ -56,6 +59,14 @@ public class EditCurrentDataFragment extends Fragment {
         updateViews();
     }
 
+    private void setEnabledElements(boolean enabled) {
+        mColdWaterEditText.setEnabled(enabled);
+        mHotWaterEditText.setEnabled(enabled);
+        mDayLightEditText.setEnabled(enabled);
+        mNightLightEditText.setEnabled(enabled);
+        mSaveButton.setEnabled(enabled);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +93,9 @@ public class EditCurrentDataFragment extends Fragment {
         mEditView = inflater.inflate(R.layout.fragment_edit_current, container, false);
 
         mEditCurrentProgressBar = (ProgressBar) mEditView.findViewById(R.id.edit_current_progress);
+        mEditCurrentProgressBar.setVisibility(View.VISIBLE);
+
+        mSaveProgressBar = (ProgressBar) mEditView.findViewById(R.id.save_progress_bar);
 
         mColdWaterEditText = (EditText) mEditView.findViewById(R.id.cold_water_edit);
         mHotWaterEditText = (EditText) mEditView.findViewById(R.id.hot_water_edit);
@@ -91,12 +105,21 @@ public class EditCurrentDataFragment extends Fragment {
         TextView currentMonthTextView = (TextView) mEditView.findViewById(R.id.current_month);
         currentMonthTextView.setText(mCurrentMonth);
 
+        mErrorText = (TextView) mEditView.findViewById(R.id.error_text_view);
+
         updateViews();
 
         mSaveButton = (Button) mEditView.findViewById(R.id.save_button);
+
+        setEnabledElements(false);
+
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mSaveProgressBar.setVisibility(View.VISIBLE);
+                setEnabledElements(false);
+                mErrorText.setVisibility(View.INVISIBLE);
+
                 mCosmoServiceClient.saveCurrentMetersData(getEditTextData(), new SaveDataListener() {
                     @Override
                     public void onSuccess() {
@@ -104,11 +127,18 @@ public class EditCurrentDataFragment extends Fragment {
                             @Override
                             public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> currentMetersData) {
                                 updateMetersData(currentMetersData);
+
+                                mSaveProgressBar.setVisibility(View.INVISIBLE);
+                                setEnabledElements(true);
                             }
 
                             @Override
                             public void onError(int errorCode) {
                                 System.out.println("retrieveCurrentMetersData returned with error code " + Integer.toString(errorCode));
+
+                                mSaveProgressBar.setVisibility(View.INVISIBLE);
+                                setEnabledElements(true);
+                                mErrorText.setVisibility(View.VISIBLE);
                             }
                         });
                     }
@@ -116,6 +146,10 @@ public class EditCurrentDataFragment extends Fragment {
                     @Override
                     public void onError(int errorCode) {
                         System.out.println("saveCurrentMetersData failed with error " + Integer.toString(errorCode));
+
+                        mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
+                        setEnabledElements(true);
+                        mErrorText.setVisibility(View.VISIBLE);
                     }
                 });
             }
@@ -179,11 +213,7 @@ public class EditCurrentDataFragment extends Fragment {
         mDayLightEditText.setText(mDayLightValue.toString());
         mNightLightEditText.setText(mNightLightValue.toString());
 
-        mColdWaterEditText.setEnabled(true);
-        mHotWaterEditText.setEnabled(true);
-        mDayLightEditText.setEnabled(true);
-        mNightLightEditText.setEnabled(true);
-        mSaveButton.setEnabled(true);
+        setEnabledElements(true);
         mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
     }
 

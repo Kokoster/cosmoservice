@@ -27,6 +27,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/current_month"
+                android:layout_alignParentBottom="false"
+                android:layout_marginLeft="24dp"
+                android:layout_marginBottom="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginTop="24dp"
+                android:textSize="32sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Холодная вода"
                 android:id="@+id/cold_water_label"
                 android:layout_alignParentLeft="true"
@@ -94,8 +107,7 @@
                 android:width="100dp"
                 android:textColor="@android:color/primary_text_light"
                 android:textSize="16sp"
-                android:inputType="numberDecimal"
-                android:enabled="false"/>
+                android:inputType="numberDecimal" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -109,8 +121,7 @@
                 android:layout_alignBottom="@+id/hot_water_label"
                 android:layout_alignRight="@+id/cold_water_edit"
                 android:textSize="16sp"
-                android:inputType="numberDecimal"
-                android:enabled="false"/>
+                android:inputType="numberDecimal" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -124,8 +135,7 @@
                 android:layout_alignBottom="@+id/day_light_label"
                 android:layout_alignRight="@+id/hot_water_edit"
                 android:textSize="16sp"
-                android:inputType="numberDecimal"
-                android:enabled="false"/>
+                android:inputType="numberDecimal" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -139,41 +149,61 @@
                 android:layout_alignBottom="@+id/night_light_label"
                 android:layout_alignRight="@+id/day_light_edit"
                 android:textSize="16sp"
-                android:inputType="numberDecimal"
-                android:enabled="false"/>
+                android:inputType="numberDecimal" />
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:background="@drawable/custom_button"
-                android:textColor="@color/colorButtonText"
-                android:layout_width="fill_parent"
+            <RelativeLayout
                 android:layout_height="wrap_content"
-                android:text="сохранить"
-                android:id="@+id/save_button"
-                android:layout_centerVertical="true"
-                android:textSize="16sp"
-                android:layout_alignParentStart="false"
-                android:layout_alignParentEnd="false"
-                android:layout_alignParentLeft="false"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="100dp"
-                android:layout_marginTop="24dp"
-                android:layout_below="@+id/night_light_label"
-                android:layout_marginLeft="100dp"
-                android:enabled="false"/>
+                android:layout_width="wrap_content"
+                android:id="@+id/button_layout"
+                android:layout_below="@+id/night_light_label">
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:background="@drawable/custom_button"
+                    android:textColor="@color/colorButtonText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="сохранить"
+                    android:id="@+id/save_button"
+                    android:layout_centerVertical="true"
+                    android:textSize="16sp"
+                    android:layout_marginRight="100dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginLeft="100dp"/>
+
+                <ProgressBar
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/save_progress_bar"
+                    android:layout_gravity="right"
+                    android:visibility="invisible"
+                    android:indeterminate="true"
+                    android:minHeight="30dp"
+                    android:minWidth="30dp"
+                    android:maxHeight="30dp"
+                    android:maxWidth="30dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_alignRight="@+id/save_button"
+                    android:layout_alignTop="@+id/save_button">
+                </ProgressBar>
+            </RelativeLayout>
 
             <TextView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/current_month"
-                android:layout_alignParentBottom="false"
-                android:layout_marginLeft="24dp"
-                android:layout_marginBottom="24dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:layout_marginTop="24dp"
-                android:textSize="32sp" />
+                android:layout_width="wrap_content"
+                android:id="@+id/error_text_view"
+                android:text="Произошла ошибка.Попробуйте еще раз."
+                android:layout_alignLeft="@+id/button_layout"
+                android:layout_below="@+id/button_layout"
+                android:textColor="@color/colorError"
+                android:textSize="14sp"
+                android:textIsSelectable="false"
+                android:layout_alignRight="@+id/button_layout"
+                android:layout_marginLeft="100dp"
+                android:layout_marginRight="100dp"
+                android:visibility="invisible">
+            </TextView>
         </RelativeLayout>
      </ScrollView>
 </RelativeLayout>
