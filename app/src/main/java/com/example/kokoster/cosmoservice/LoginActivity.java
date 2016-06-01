@@ -19,6 +19,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText loginEditText;
     private EditText passwordEditText;
     private ProgressBar mProgressBar;
+    private TextView errorTextView;
 
     private String username;
     private String password;
@@ -46,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
         password = passwordEditText.getText().toString();
 
 
+        errorTextView = (TextView) findViewById(R.id.error_text_view);
+
         loginButton = (Button) findViewById(com.example.kokoster.cosmoservice.R.id.login_button);
         if (loginEditText.getText().toString().equals("") && passwordEditText.getText().toString().equals("")) {
             loginButton.setEnabled(false);
@@ -57,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setEnabled(false);
                 loginEditText.setEnabled(false);
                 passwordEditText.setEnabled(false);
+                errorTextView.setVisibility(View.INVISIBLE);
 
                 cosmoServiceClient.login(username, password, new ResponseListener() {
                     @Override
@@ -65,6 +69,11 @@ public class LoginActivity extends AppCompatActivity {
                         mainActivityIntent.putExtra("token", cosmoServiceClient.getToken());
                         startActivity(mainActivityIntent);
 //                        System.out.println("LoginActivity. Token = " + cosmoServiceClient.getToken());
+
+                        mProgressBar.setVisibility(View.INVISIBLE);
+                        loginButton.setEnabled(true);
+                        loginEditText.setEnabled(true);
+                        passwordEditText.setEnabled(true);
                     }
 
                     @Override
@@ -73,7 +82,8 @@ public class LoginActivity extends AppCompatActivity {
                         loginButton.setEnabled(true);
                         loginEditText.setEnabled(true);
                         passwordEditText.setEnabled(true);
-                        // TODO: create meassage
+
+                        errorTextView.setVisibility(View.VISIBLE);
                     }
                 });
             }

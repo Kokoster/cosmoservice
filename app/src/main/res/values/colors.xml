@@ -11,4 +11,5 @@
     <color name="colorBackground">@android:color/white</color>
     <color name="divider">#b6b6b6</color>
     <color name="colorButtonDisabled">#dac1bfbf</color>
+    <color name="colorError">#f1ff0e0e</color>
 </resources>
