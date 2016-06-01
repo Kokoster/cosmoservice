@@ -178,14 +178,13 @@
                     android:layout_gravity="right"
                     android:visibility="invisible"
                     android:indeterminate="true"
-                    android:minHeight="30dp"
+                    android:minHeight="25dp"
                     android:minWidth="30dp"
-                    android:maxHeight="30dp"
-                    android:maxWidth="30dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:maxHeight="25dp"
+                    android:maxWidth="25dp"
                     android:layout_alignRight="@+id/save_button"
-                    android:layout_alignTop="@+id/save_button">
+                    android:layout_alignTop="@+id/save_button"
+                    android:layout_marginRight="10dp">
                 </ProgressBar>
             </RelativeLayout>
 
