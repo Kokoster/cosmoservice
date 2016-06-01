@@ -8,19 +8,17 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * Created by kokoster on 28.05.16.
  */
-public class MetersHistoryTabFragment extends Fragment {
+public class MetersHistoryFragment extends Fragment {
+    private View mHistoryView = null;
+    private ArrayList<ArrayList<String>> mMetersHistory = null;
 
-    public static MetersHistoryTabFragment newInstance(ArrayList<ArrayList<String>> historyData) {
-        MetersHistoryTabFragment fragment = new MetersHistoryTabFragment();
+    public static MetersHistoryFragment newInstance() {
+        MetersHistoryFragment fragment = new MetersHistoryFragment();
         return fragment;
     }
 
@@ -33,34 +31,41 @@ public class MetersHistoryTabFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View historyView = inflater.inflate(R.layout.fragment_history_list, container, false);
+        mHistoryView = inflater.inflate(R.layout.fragment_history_list, container, false);
 
-        updateView(historyView);
+        updateView(mMetersHistory);
 
-        return historyView;
+        return mHistoryView;
     }
 
-    private void updateView(View historyView) {
+    private void updateView(ArrayList<ArrayList<String>> metersHistory) {
         // adapter -> map -> set to list
-        View fragmentView = historyView;
-
-        if (fragmentView == null) {
+        if (mHistoryView == null) {
             return;
         }
 
-        ListView listView = (ListView) fragmentView.findViewById(R.id.metersList);
+        if (metersHistory == null) {
+            return;
+        }
+
+        ListView listView = (ListView) mHistoryView.findViewById(R.id.metersList);
+
+        if (listView == null) {
+            return;
+        }
 
         int viewResourceID = com.example.kokoster.cosmoservice.R.layout.meter_list_item;
 
-        MainActivity activity = (MainActivity) getActivity();
+        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(getActivity(), viewResourceID, metersHistory);
 
-        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(getActivity(), viewResourceID, activity.getHistoryData());
-
-        if (listView != null) {
-            listView.setAdapter(adapter);
-        }
-
+        listView.setAdapter(adapter);
         listView.addHeaderView(createHeader());
+        listView.setVisibility(View.VISIBLE);
+    }
+
+    public void setMetersHistory(ArrayList<ArrayList<String>> metersHistory) {
+        mMetersHistory = metersHistory;
+        updateView(metersHistory);
     }
 
     private View createHeader() {

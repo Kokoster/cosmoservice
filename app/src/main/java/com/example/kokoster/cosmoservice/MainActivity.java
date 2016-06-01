@@ -1,17 +1,10 @@
 package com.example.kokoster.cosmoservice;
 
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabSelectedListener;
@@ -28,15 +21,13 @@ public class MainActivity extends AppCompatActivity {
 
     private CoordinatorLayout mCoordinatorLayout;
 
-    private Fragment mMeterHistoryFragment;
-    private Fragment mCurrentDataFragment;
+    private MetersHistoryFragment mMeterHistoryFragment;
+    private EditCurrentDataFragment mCurrentDataFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.example.kokoster.cosmoservice.R.layout.activity_main);
-
-        createBottomBar(savedInstanceState);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,6 +48,15 @@ public class MainActivity extends AppCompatActivity {
 
         mCosmoServiceClient = new CosmoServiceClient(this.getCacheDir(), token);
 
+        mMeterHistoryFragment = MetersHistoryFragment.newInstance();
+        mCurrentDataFragment = EditCurrentDataFragment.newInstance(mCosmoServiceClient);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, mMeterHistoryFragment);
+        fragmentTransaction.commit();
+
+        createBottomBar(savedInstanceState);
+
         mMeterData = new HashMap<>();
 
         Listener responseListener = new Listener();
@@ -65,10 +65,17 @@ public class MainActivity extends AppCompatActivity {
         mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.DAY_LIGHT, responseListener);
         mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, responseListener);
 
-//        mCurrentDataFragment = EditCurrentDataFragment.newInstance(mCosmoServiceClient);
-        mCurrentDataFragment = new Fragment();
+        mCosmoServiceClient.retrieveCurrentMonth(new MonthRequestListener() {
+            @Override
+            public void onSuccess(String month) {
+                mCurrentDataFragment.setCurrentMonth(month);
+            }
 
-        showTabs();
+            @Override
+            public void onError(int errorCode) {
+                System.out.println("retrieveCurrentMonth failed with " + Integer.toString(errorCode) + " error code");
+            }
+        });
     }
 
     private class Listener implements MeterDataHistoryResponseListener {
@@ -77,28 +84,16 @@ public class MainActivity extends AppCompatActivity {
             mMeterData.put(dataId, allMonths);
 
             if (allMeterDataRetreived()) {
-                System.out.println("in MainActivity success");
+                System.out.println("In MainActivity. All meter data retreived");
 
-                mMeterHistoryFragment = new MetersHistoryTabFragment();
-
-                showTabs();
+                mMeterHistoryFragment.setMetersHistory(createListFromMap(mMeterData));
             }
         }
 
         @Override
         public void onError(CosmoServiceClient.METER_DATAID dataId, int errorCode) {
-            System.out.println("Failed to retreive meter history, dataid: " + dataId + ", error: " + Integer.toString(errorCode));
+            System.out.println("Failed to retrieve meter history, dataid: " + dataId + ", error: " + Integer.toString(errorCode));
         }
-    }
-
-    private void showTabs() {
-        if (mMeterHistoryFragment == null) {
-            return;
-        }
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, mMeterHistoryFragment);
-        fragmentTransaction.commit();
     }
 
     private ArrayList<ArrayList<String>> createListFromMap(HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> historyData) {
@@ -180,9 +175,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    public ArrayList<ArrayList<String>> getHistoryData() {
-        return createListFromMap(mMeterData);
     }
 }

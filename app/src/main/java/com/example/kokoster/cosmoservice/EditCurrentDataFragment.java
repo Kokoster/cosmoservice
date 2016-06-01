@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
@@ -18,7 +19,12 @@ import java.util.HashMap;
  */
 public class EditCurrentDataFragment extends Fragment {
     private static String COSMO_SERVICE_OBJECT_KEY = "cosmo_service";
-    CosmoServiceClient mCosmoServiceClient;
+
+    private View mEditView = null;
+
+    private ProgressBar mEditCurrentProgressBar;
+    private CosmoServiceClient mCosmoServiceClient = null;
+    private String mCurrentMonth = "";
 
     EditText mColdWaterEditText;
     EditText mHotWaterEditText;
@@ -30,7 +36,7 @@ public class EditCurrentDataFragment extends Fragment {
     BigDecimal mDayLightValue;
     BigDecimal mNightLightValue;
 
-    Button saveButton;
+    Button mSaveButton;
 
     public static EditCurrentDataFragment newInstance(CosmoServiceClient cosmoServiceClient) {
         Bundle args = new Bundle();
@@ -73,30 +79,22 @@ public class EditCurrentDataFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View editView = inflater.inflate(R.layout.fragment_edit_current, container, false);
+        mEditView = inflater.inflate(R.layout.fragment_edit_current, container, false);
 
-        mColdWaterEditText = (EditText) editView.findViewById(R.id.cold_water_edit);
-        mHotWaterEditText = (EditText) editView.findViewById(R.id.hot_water_edit);
-        mDayLightEditText = (EditText) editView.findViewById(R.id.day_light_edit);
-        mNightLightEditText = (EditText) editView.findViewById(R.id.night_light_edit);
+        mEditCurrentProgressBar = (ProgressBar) mEditView.findViewById(R.id.edit_current_progress);
 
-        mCosmoServiceClient.retrieveCurrentMonth(new MonthRequestListener() {
-            @Override
-            public void onSuccess(String month) {
-                TextView currentMonthTextView = (TextView) editView.findViewById(R.id.current_month);
-                currentMonthTextView.setText(month);
-            }
+        mColdWaterEditText = (EditText) mEditView.findViewById(R.id.cold_water_edit);
+        mHotWaterEditText = (EditText) mEditView.findViewById(R.id.hot_water_edit);
+        mDayLightEditText = (EditText) mEditView.findViewById(R.id.day_light_edit);
+        mNightLightEditText = (EditText) mEditView.findViewById(R.id.night_light_edit);
 
-            @Override
-            public void onError(int errorCode) {
-                System.out.println("retrieveCurrentMonth failed with " + Integer.toString(errorCode) + " error code");
-            }
-        });
+        TextView currentMonthTextView = (TextView) mEditView.findViewById(R.id.current_month);
+        currentMonthTextView.setText(mCurrentMonth);
 
         updateViews();
 
-        saveButton = (Button) editView.findViewById(R.id.save_button);
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        mSaveButton = (Button) mEditView.findViewById(R.id.save_button);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mCosmoServiceClient.saveCurrentMetersData(getEditTextData(), new SaveDataListener() {
@@ -159,7 +157,7 @@ public class EditCurrentDataFragment extends Fragment {
         });
 
         // Inflate the layout for this fragment
-        return editView;
+        return mEditView;
     }
 
     @SuppressLint("SetTextI18n")
@@ -180,5 +178,23 @@ public class EditCurrentDataFragment extends Fragment {
         mHotWaterEditText.setText(mHotWaterValue.toString());
         mDayLightEditText.setText(mDayLightValue.toString());
         mNightLightEditText.setText(mNightLightValue.toString());
+
+        mColdWaterEditText.setEnabled(true);
+        mHotWaterEditText.setEnabled(true);
+        mDayLightEditText.setEnabled(true);
+        mNightLightEditText.setEnabled(true);
+        mSaveButton.setEnabled(true);
+        mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    public void setCurrentMonth(String currentMonth) {
+        mCurrentMonth = currentMonth;
+
+        if (mEditView == null) {
+            return;
+        }
+
+        TextView currentMonthTextView = (TextView) mEditView.findViewById(R.id.current_month);
+        currentMonthTextView.setText(mCurrentMonth);
     }
 }
