@@ -18,94 +18,52 @@ import java.util.HashMap;
  * Created by kokoster on 28.05.16.
  */
 public class MetersHistoryTabFragment extends Fragment {
-    private static String COSMO_SERVICE_OBJECT_KEY = "cosmo_service";
-    CosmoServiceClient mCosmoServiceClient;
-    private HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> mMeterData;
 
-    public static MetersHistoryTabFragment newInstance(CosmoServiceClient cosmoServiceClient) {
-        Bundle args = new Bundle();
-        args.putSerializable(COSMO_SERVICE_OBJECT_KEY, cosmoServiceClient);
+    public static MetersHistoryTabFragment newInstance(ArrayList<ArrayList<String>> historyData) {
         MetersHistoryTabFragment fragment = new MetersHistoryTabFragment();
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mCosmoServiceClient = (CosmoServiceClient) getArguments().getSerializable(
-                COSMO_SERVICE_OBJECT_KEY);
-
-        ArrayList<MonthData> allMonthsData;
-
-        mMeterData = new HashMap<>();
-
-        Listener responseListener = new Listener();
-        mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.COLD_WATER, responseListener);
-        mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.HOT_WATER, responseListener);
-        mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.DAY_LIGHT, responseListener);
-        mCosmoServiceClient.getMeterHistory(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, responseListener);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_history_list, container, false);
+        final View historyView = inflater.inflate(R.layout.fragment_history_list, container, false);
+
+        updateView(historyView);
+
+        return historyView;
     }
 
-    private class Listener implements MeterDataHistoryResponseListener {
-        @Override
-        public void onSuccess(CosmoServiceClient.METER_DATAID dataId, ArrayList<MonthData> allMonths) {
-            mMeterData.put(dataId, allMonths);
-
-            if (allMeterDataRetreived()) {
-                System.out.println("in MainActivity success");
-//                mCosmoServiceClient.retrieveCurrentMetersData(new MetersCurrentDataListener() {
-//                    @Override
-//                    public void onSuccess(HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> metersCurrentData) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(int errorCode) {
-//
-//                    }
-//                });
-
-                updateView();
-
-//                HashMap<CosmoServiceClient.METER_DATAID, BigDecimal> data = new HashMap<>();
-//                data.put(CosmoServiceClient.METER_DATAID.COLD_WATER, new BigDecimal(111));
-//                data.put(CosmoServiceClient.METER_DATAID.HOT_WATER, new BigDecimal(0));
-//                data.put(CosmoServiceClient.METER_DATAID.DAY_LIGHT, new BigDecimal(0));
-//                data.put(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, new BigDecimal(0));
-//
-//                mCosmoServiceClient.saveCurrentMetersData(data);
-            }
-        }
-
-        @Override
-        public void onError(CosmoServiceClient.METER_DATAID dataId, int errorCode) {
-            System.out.println("Failed to retreive meter history, dataid: " + dataId + ", error: " + Integer.toString(errorCode));
-        }
-    }
-
-    private void updateView() {
+    private void updateView(View historyView) {
         // adapter -> map -> set to list
-        View fragmentView = getView();
+        View fragmentView = historyView;
+
+        if (fragmentView == null) {
+            return;
+        }
 
         ListView listView = (ListView) fragmentView.findViewById(R.id.metersList);
 
         int viewResourceID = com.example.kokoster.cosmoservice.R.layout.meter_list_item;
-        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(getActivity(), viewResourceID, createListFromMap(mMeterData));
-        listView.setAdapter(adapter);
 
-        setHeader(listView);
+        MainActivity activity = (MainActivity) getActivity();
+
+        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(getActivity(), viewResourceID, activity.getHistoryData());
+
+        if (listView != null) {
+            listView.setAdapter(adapter);
+        }
+
+        listView.addHeaderView(createHeader());
     }
 
-    private void setHeader(ListView listView) {
+    private View createHeader() {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View listHeaderView = inflater.inflate(
                 R.layout.meter_list_item, null);
@@ -122,61 +80,6 @@ public class MetersHistoryTabFragment extends Fragment {
         dayLightTextView.setText("День (кВт)");
         nightLightTextView.setText("Ночь (кВт)");
 
-        listView.addHeaderView(listHeaderView);
-    }
-
-    private boolean allMeterDataRetreived() {
-        return mMeterData.size() == 4;
-    }
-
-    private ArrayList<ArrayList<String>> createListFromMap(HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> historyData) {
-        ArrayList<ArrayList<String>> data = new ArrayList<>();
-
-        int size = getMax(historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).size(),
-                historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).size(),
-                historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).size(),
-                historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).size());
-
-        for (int i = 0; i < size; ++i) {
-            ArrayList<String> row = new ArrayList<>();
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).get(i).date);
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).get(i).value.toString());
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).get(i).value.toString());
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).get(i).value.toString());
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).get(i).value.toString());
-            }
-
-            data.add(row);
-        }
-
-        return data;
-    }
-
-    private int getMax(Integer ... meters) {
-        return Collections.max(new ArrayList<Integer>(Arrays.asList(meters)));
+        return listHeaderView;
     }
 }
