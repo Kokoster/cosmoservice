@@ -1,6 +1,7 @@
 package com.example.kokoster.cosmoservice;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,9 +23,10 @@ public class EditCurrentDataFragment extends Fragment {
 
     private View mEditView = null;
 
-    private ProgressBar mEditCurrentProgressBar;
     private ProgressBar mSaveProgressBar;
     private TextView mErrorText;
+
+    private ProgressDialog mProgressDilog;
 
     private CosmoServiceClient mCosmoServiceClient = null;
     private String mCurrentMonth = "";
@@ -92,8 +94,7 @@ public class EditCurrentDataFragment extends Fragment {
                              Bundle savedInstanceState) {
         mEditView = inflater.inflate(R.layout.fragment_edit_current, container, false);
 
-        mEditCurrentProgressBar = (ProgressBar) mEditView.findViewById(R.id.edit_current_progress);
-        mEditCurrentProgressBar.setVisibility(View.VISIBLE);
+        mProgressDilog = ProgressDialog.show(mEditView.getContext(), "", "Загрузка");
 
         mSaveProgressBar = (ProgressBar) mEditView.findViewById(R.id.save_progress_bar);
 
@@ -111,7 +112,7 @@ public class EditCurrentDataFragment extends Fragment {
 
         mSaveButton = (Button) mEditView.findViewById(R.id.save_button);
 
-        setEnabledElements(false);
+//        setEnabledElements(false);
 
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,7 +148,7 @@ public class EditCurrentDataFragment extends Fragment {
                     public void onError(int errorCode) {
                         System.out.println("saveCurrentMetersData failed with error " + Integer.toString(errorCode));
 
-                        mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
+                        mProgressDilog.dismiss();
                         setEnabledElements(true);
                         mErrorText.setVisibility(View.VISIBLE);
                     }
@@ -213,8 +214,8 @@ public class EditCurrentDataFragment extends Fragment {
         mDayLightEditText.setText(mDayLightValue.toString());
         mNightLightEditText.setText(mNightLightValue.toString());
 
-        setEnabledElements(true);
-        mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
+        mProgressDilog.hide();
+//        mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
     }
 
     public void setCurrentMonth(String currentMonth) {
