@@ -100,19 +100,12 @@ public class MainActivity extends AppCompatActivity {
                 SessionManager sessionManager = new SessionManager(MainActivity.this.getApplicationContext());
                 sessionManager.removeCurrentToken();
 
-                Intent loginActivityIntent = new Intent(MainActivity.this, LoginActivity.class);
-                loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(loginActivityIntent);
+                createLoginActivity();
 
                 break;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
     }
 
     private class Listener implements MeterDataHistoryResponseListener {
@@ -212,5 +205,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void createLoginActivity() {
+        Intent loginActivityIntent = new Intent(this, LoginActivity.class);
+        loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(loginActivityIntent);
+        overridePendingTransition(0,0);
+        finish();
     }
 }

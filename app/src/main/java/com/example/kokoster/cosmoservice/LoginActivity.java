@@ -73,9 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                         System.out.println("Login Activity. Check is token saved. Current saved token: "
                                 + sessionManager.getCurrentToken());
 
-                        Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        mainActivityIntent.putExtra("token", cosmoServiceClient.getToken());
-                        startActivity(mainActivityIntent);
+                        createMainActivity(cosmoServiceClient.getToken());
 
                         System.out.println("LoginActivity. Token = " + cosmoServiceClient.getToken());
 
@@ -154,5 +152,15 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
+    }
+
+    private void createMainActivity(String currentToken) {
+        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        mainActivityIntent.putExtra("token", currentToken);
+        mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(mainActivityIntent);
+        overridePendingTransition(0,0);
+        finish();
     }
 }
