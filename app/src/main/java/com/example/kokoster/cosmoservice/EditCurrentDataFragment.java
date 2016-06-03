@@ -214,7 +214,7 @@ public class EditCurrentDataFragment extends Fragment {
         mDayLightEditText.setText(mDayLightValue.toString());
         mNightLightEditText.setText(mNightLightValue.toString());
 
-        mProgressDilog.hide();
+        mProgressDilog.dismiss();
 //        mEditCurrentProgressBar.setVisibility(View.INVISIBLE);
     }
 

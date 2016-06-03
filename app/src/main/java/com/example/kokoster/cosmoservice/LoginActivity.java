@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -68,13 +69,15 @@ public class LoginActivity extends AppCompatActivity {
                         Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
                         mainActivityIntent.putExtra("token", cosmoServiceClient.getToken());
                         startActivity(mainActivityIntent);
-//                        System.out.println("LoginActivity. Token = " + cosmoServiceClient.getToken());
+
+                        System.out.println("LoginActivity. Token = " + cosmoServiceClient.getToken());
 
                         mProgressBar.setVisibility(View.INVISIBLE);
                         loginButton.setEnabled(true);
                         loginEditText.setEnabled(true);
                         passwordEditText.setEnabled(true);
                     }
+
 
                     @Override
                     public void onError(int errorCode) {
@@ -139,20 +142,10 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
 
-//        LoginLinearLayout loginLayout = ((LoginLinearLayout)findViewById(R.id.login_layout));
-//        if (loginLayout != null) {
-//            loginLayout.setOnSoftKeyboardListener(new LoginLinearLayout.OnSoftKeyboardListener() {
-//                @Override
-//                public void onShown() {
-//                    findViewById(R.id.cosmologo_image).setVisibility(View.GONE);
-//                }
-//
-//                @Override
-//                public void onHidden() {
-//                    findViewById(R.id.cosmologo_image).setVisibility(View.VISIBLE);
-//                }
-//            });
-//        }
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

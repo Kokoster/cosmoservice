@@ -1,10 +1,14 @@
 package com.example.kokoster.cosmoservice;
 
+import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabSelectedListener;
@@ -13,11 +17,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
     private CosmoServiceClient mCosmoServiceClient;
     private HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> mMeterData;
-    private Toolbar toolbar;
+    private Toolbar mToolbar;
 
     private CoordinatorLayout mCoordinatorLayout;
 
@@ -29,8 +34,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(com.example.kokoster.cosmoservice.R.layout.activity_main);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (mToolbar != null) {
+            mToolbar.showOverflowMenu();
+        }
+
+        setSupportActionBar(mToolbar);
 
         String token;
         if (savedInstanceState == null) {
@@ -76,6 +85,31 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("retrieveCurrentMonth failed with " + Integer.toString(errorCode) + " error code");
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.tool_bar_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.log_out:
+                Intent loginActivityIntent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(loginActivityIntent);
+
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 
     private class Listener implements MeterDataHistoryResponseListener {

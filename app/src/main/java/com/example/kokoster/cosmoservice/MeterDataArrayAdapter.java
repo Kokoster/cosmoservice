@@ -35,6 +35,12 @@ public class MeterDataArrayAdapter extends ArrayAdapter {
         TextView dayLightTextView = (TextView) rowView.findViewById(R.id.day_light_text);
         TextView nightLightTextView = (TextView) rowView.findViewById(R.id.night_light_text);
 
+
+        if (dateTextView == null || coldWaterTextView == null || hotWaterTextView == null ||
+                dayLightTextView == null || nightLightTextView == null) {
+            return null;
+        }
+
         dateTextView.setText(historyData.get(position).get(0));
         coldWaterTextView.setText(historyData.get(position).get(1));
         hotWaterTextView.setText(historyData.get(position).get(2));

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class MetersHistoryFragment extends Fragment {
     private View mHistoryView = null;
     private ArrayList<ArrayList<String>> mMetersHistory = null;
+    private View mListHeaderView;
 
     public static MetersHistoryFragment newInstance() {
         MetersHistoryFragment fragment = new MetersHistoryFragment();
@@ -32,6 +33,9 @@ public class MetersHistoryFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mHistoryView = inflater.inflate(R.layout.fragment_history_list, container, false);
+
+        mListHeaderView = inflater.inflate(
+                R.layout.meter_list_item, null);
 
         updateView(mMetersHistory);
 
@@ -56,7 +60,7 @@ public class MetersHistoryFragment extends Fragment {
 
         int viewResourceID = com.example.kokoster.cosmoservice.R.layout.meter_list_item;
 
-        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(getActivity(), viewResourceID, metersHistory);
+        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(mHistoryView.getContext(), viewResourceID, metersHistory);
 
         listView.setAdapter(adapter);
         listView.addHeaderView(createHeader());
@@ -68,23 +72,25 @@ public class MetersHistoryFragment extends Fragment {
         updateView(metersHistory);
     }
 
-    private View createHeader() {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View listHeaderView = inflater.inflate(
-                R.layout.meter_list_item, null);
 
-        TextView dateTextView = (TextView) listHeaderView.findViewById(R.id.date_text);
-        TextView coldWaterTextView = (TextView) listHeaderView.findViewById(R.id.cold_water_text);
-        TextView hotWaterTextView = (TextView) listHeaderView.findViewById(R.id.hot_water_text);
-        TextView dayLightTextView = (TextView) listHeaderView.findViewById(R.id.day_light_text);
-        TextView nightLightTextView = (TextView) listHeaderView.findViewById(R.id.night_light_text);
+    // TODO: createHeader(inflater) or member?
+    private View createHeader() {
+        if (mHistoryView == null || mListHeaderView == null) {
+            return null;
+        }
+
+        TextView dateTextView = (TextView) mListHeaderView.findViewById(R.id.date_text);
+        TextView coldWaterTextView = (TextView) mListHeaderView.findViewById(R.id.cold_water_text);
+        TextView hotWaterTextView = (TextView) mListHeaderView.findViewById(R.id.hot_water_text);
+        TextView dayLightTextView = (TextView) mListHeaderView.findViewById(R.id.day_light_text);
+        TextView nightLightTextView = (TextView) mListHeaderView.findViewById(R.id.night_light_text);
 
         dateTextView.setText("Дата");
-        coldWaterTextView.setText("Хол (m3)");
+        coldWaterTextView.setText("Хол (м3)");
         hotWaterTextView.setText("Гор (м3)");
         dayLightTextView.setText("День (кВт)");
         nightLightTextView.setText("Ночь (кВт)");
 
-        return listHeaderView;
+        return mListHeaderView;
     }
 }
