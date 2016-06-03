@@ -2,6 +2,7 @@ package com.example.kokoster.cosmoservice;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -66,6 +67,12 @@ public class LoginActivity extends AppCompatActivity {
                 cosmoServiceClient.login(username, password, new ResponseListener() {
                     @Override
                     public void onSuccess() {
+                        SessionManager sessionManager = new SessionManager(LoginActivity.this.getApplicationContext());
+                        System.out.println("Login Activity. Saving token " + cosmoServiceClient.getToken() + " to preferences");
+                        sessionManager.saveCurrentToken(cosmoServiceClient.getToken());
+                        System.out.println("Login Activity. Check is token saved. Current saved token: "
+                                + sessionManager.getCurrentToken());
+
                         Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
                         mainActivityIntent.putExtra("token", cosmoServiceClient.getToken());
                         startActivity(mainActivityIntent);

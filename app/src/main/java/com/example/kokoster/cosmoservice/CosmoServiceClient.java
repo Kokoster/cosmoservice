@@ -3,6 +3,7 @@ package com.example.kokoster.cosmoservice;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -84,9 +85,43 @@ public class CosmoServiceClient implements Serializable {
         return params[1];
     }
 
-    public void login(String username, String password, ResponseListener responseListener) {
-        mRequestQueue.start();
+    public void checkToken(final String token, final ResponseListener responseListener) {
+        String url = "http://cosmoservice.spb.ru/privoff/office.php";
+        final String tokenNotFoundString = "Token is not found";
 
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (response.contains(tokenNotFoundString)) {
+                    responseListener.onError(-1);
+                } else {
+                    responseListener.onSuccess();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error.networkResponse != null) {
+                    responseListener.onError(error.networkResponse.statusCode);
+                } else {
+                    responseListener.onError(-1);
+                }
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                System.out.println("In MainActivity in headers token = " + token);
+                headers.put("Cookie", "token=" + token);
+
+                return headers;
+            }
+        };
+
+        mRequestQueue.add(stringRequest);
+    }
+
+    public void login(String username, String password, ResponseListener responseListener) {
         login(username, password, responseListener, 0);
     }
 

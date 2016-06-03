@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
     private CosmoServiceClient mCosmoServiceClient;
@@ -98,7 +97,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.log_out:
+                SessionManager sessionManager = new SessionManager(MainActivity.this.getApplicationContext());
+                sessionManager.removeCurrentToken();
+
                 Intent loginActivityIntent = new Intent(MainActivity.this, LoginActivity.class);
+                loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(loginActivityIntent);
 
                 break;
