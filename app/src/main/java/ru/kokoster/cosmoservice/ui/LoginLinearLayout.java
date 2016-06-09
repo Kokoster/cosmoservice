@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -37,7 +37,7 @@ public class LoginLinearLayout extends LinearLayout {
     }
 
     public interface OnSoftKeyboardListener {
-        public void onShown();
-        public void onHidden();
+        void onShown();
+        void onHidden();
     }
 }

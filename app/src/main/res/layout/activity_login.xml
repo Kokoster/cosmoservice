@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.example.kokoster.cosmoservice.LoginLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ru.kokoster.cosmoservice.ui.LoginLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:id="@+id/login_layout"
@@ -20,7 +20,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
-            tools:context=".LoginActivity"
+            tools:context=".ui.LoginActivity"
             android:background="@color/colorBackground">
 
             <ImageView
@@ -128,4 +128,4 @@
             </TextView>
         </RelativeLayout>
     </ScrollView>
-</com.example.kokoster.cosmoservice.LoginLinearLayout>
+</ru.kokoster.cosmoservice.ui.LoginLinearLayout>

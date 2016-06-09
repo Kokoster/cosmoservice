@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.ui;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,22 +9,24 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ru.kokoster.cosmoservice.R;
+
 /**
  * Created by kokoster on 15.05.16.
  */
 public class MeterDataArrayAdapter extends ArrayAdapter {
-    private Context context;
-    private final ArrayList<ArrayList<String>> historyData;
+    private Context mContext;
+    private final ArrayList<ArrayList<String>> mHistoryData;
 
     public MeterDataArrayAdapter(Context context, int viewResourceId, ArrayList<ArrayList<String>> data) {
         super(context, viewResourceId, data);
-        this.context = context;
-        this.historyData = data;
+        this.mContext = context;
+        this.mHistoryData = data;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.
+        LayoutInflater inflater = (LayoutInflater) mContext.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View rowView = inflater.inflate(R.layout.meter_list_item, parent, false);
@@ -41,11 +43,11 @@ public class MeterDataArrayAdapter extends ArrayAdapter {
             return null;
         }
 
-        dateTextView.setText(historyData.get(position).get(0));
-        coldWaterTextView.setText(historyData.get(position).get(1));
-        hotWaterTextView.setText(historyData.get(position).get(2));
-        dayLightTextView.setText(historyData.get(position).get(3));
-        nightLightTextView.setText(historyData.get(position).get(4));
+        dateTextView.setText(mHistoryData.get(position).get(0));
+        coldWaterTextView.setText(mHistoryData.get(position).get(1));
+        hotWaterTextView.setText(mHistoryData.get(position).get(2));
+        dayLightTextView.setText(mHistoryData.get(position).get(3));
+        nightLightTextView.setText(mHistoryData.get(position).get(4));
 
         return rowView;
     }

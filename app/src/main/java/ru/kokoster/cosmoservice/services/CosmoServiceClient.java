@@ -1,9 +1,10 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.services;
+
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.Network;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -25,10 +26,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.kokoster.cosmoservice.model.MonthData;
+
 /**
  * Created by kokoster on 13.05.16.
  */
+
+// TODO: разобраться с Parcelable
 public class CosmoServiceClient implements Serializable {
+    private static final String TAG = "CosmoServiceClient";
+
     public enum METER_DATAID {
         COLD_WATER("25046"),
         HOT_WATER("25047"),
@@ -59,30 +66,9 @@ public class CosmoServiceClient implements Serializable {
     }
 
     public CosmoServiceClient(File cacheDir, String token) {
-        Cache cache = new DiskBasedCache(cacheDir, 1024 * 1024); // 1MB cap
-        Network network = new BasicNetwork(new HurlStack());
-        mRequestQueue = new RequestQueue(cache, network);
-
-        // if something crashes try to find bug here :)
-        mRequestQueue.start();
+        this(cacheDir);
 
         this.mToken = token;
-    }
-
-    private String parseResponse(String response) {
-        String[] params = response.split("\\|", -1);
-
-        try {
-            Integer errorCode = Integer.parseInt(params[0]);
-
-            if (errorCode != 0) {
-                return null;
-            }
-        } catch (NumberFormatException e) {
-            return null;
-        }
-
-        return params[1];
     }
 
     public void checkToken(final String token, final ResponseListener responseListener) {
@@ -111,7 +97,7 @@ public class CosmoServiceClient implements Serializable {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                System.out.println("In MainActivity in headers token = " + token);
+                Log.d(TAG, "getHeaders. Token = " + token);
                 headers.put("Cookie", "token=" + token);
 
                 return headers;
@@ -132,56 +118,55 @@ public class CosmoServiceClient implements Serializable {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println("success");
                         mToken = parseResponse(response);
 
                         if (mToken == null) {
                             if (responseListener != null) {
                                 responseListener.onError(-1);
                             }
-                        } else {
-                            if (responseListener != null) {
-                                getMeterHistory(CosmoServiceClient.METER_DATAID.COLD_WATER, new MeterDataHistoryResponseListener() {
-                                    @Override
-                                    public void onSuccess(METER_DATAID dataId, ArrayList<MonthData> allMonthsData) {
-                                        responseListener.onSuccess();
-                                    }
 
-                                    @Override
-                                    public void onError(METER_DATAID dataId, int errorCode) {
-                                        if (failsCount < 3)  {
-                                            System.out.println("fails count = " + Integer.toString(failsCount));
-                                            login(username, password, responseListener, failsCount + 1);
-                                        } else {
-                                            responseListener.onError(errorCode);
-                                        }
-                                    }
-                                });
-                            }
+                            return;
                         }
+
+                        getMeterHistory(CosmoServiceClient.METER_DATAID.COLD_WATER, new MeterDataHistoryResponseListener() {
+                            @Override
+                            public void onSuccess(METER_DATAID dataId, ArrayList<MonthData> allMonthsData) {
+                                if (responseListener != null) {
+                                    responseListener.onSuccess();
+                                }
+                            }
+
+                            @Override
+                            public void onError(METER_DATAID dataId, int errorCode) {
+                                if (failsCount < 3)  {
+                                    Log.d(TAG, "fails count = " + Integer.toString(failsCount));
+                                    login(username, password, responseListener, failsCount + 1);
+                                } else {
+                                    if (responseListener != null) {
+                                        responseListener.onError(errorCode);
+                                    }
+                                }
+                            }
+                        });
                     }
                  },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println("error");
-                        if (responseListener != null && error != null) {
-                            if (error.networkResponse == null) {
-                                responseListener.onError(-1);
-                            } else
-                                responseListener.onError(error.networkResponse.statusCode);
+                        if (responseListener != null) {
+                            responseListener.onError(error.networkResponse != null ?
+                                                     error.networkResponse.statusCode : -1);
                         }
                     }
                 }
         ) {
             @Override
             protected Map<String,String> getParams(){
-                System.out.println("In getParams");
                 Map<String,String> params = new HashMap<>();
+                params.put("method", "login");
+                params.put("tsgcode", "s406");
                 params.put("login", username);
                 params.put("password", password);
-                params.put("tsgcode", "s406");
-                params.put("method", "login");
 
                 return params;
             }
@@ -198,11 +183,11 @@ public class CosmoServiceClient implements Serializable {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println("succeeded to get data");
-                        ArrayList<MonthData> allMonthsData = parseHTMLResponse(response);
+                        Log.d(TAG, "getMeterHistory. Succeeded to get data");
+                        ArrayList<MonthData> allMonthsData = parseMeterHistoryResponse(response);
 
                         if (allMonthsData.size() == 0) {
-                            System.out.println("data size = 0");
+                            Log.d(TAG, "getMeterHistory. data size = 0");
                             if (responseListener != null) {
                                 responseListener.onError(meter, -1);
                             }
@@ -216,13 +201,9 @@ public class CosmoServiceClient implements Serializable {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println("got error");
-                        if (responseListener != null && error != null) {
-                            if (error.networkResponse != null) {
-                                responseListener.onError(meter, error.networkResponse.statusCode);
-                            } else {
-                                responseListener.onError(meter, -1);
-                            }
+                        if (responseListener != null) {
+                            responseListener.onError(meter, error.networkResponse != null ?
+                                    error.networkResponse.statusCode : -1);
                         }
                     }
                 }
@@ -230,7 +211,6 @@ public class CosmoServiceClient implements Serializable {
             @Override
             protected Map<String,String> getParams(){
                 Map<String,String> params = new HashMap<>();
-                System.out.println(meter.getDataid());
                 params.put("dataId", meter.getDataid() + "|-1");
 
                 return params;
@@ -239,7 +219,7 @@ public class CosmoServiceClient implements Serializable {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String,String> headers = new HashMap<>();
-                System.out.println("In MainActivity in headers token = " + mToken);
+                Log.d(TAG, "getHeaders. Token = " + mToken);
 //                headers.put("Cookie", "tsg=s406; token=" + mToken);
                 headers.put("Cookie", "token=" + mToken);
 
@@ -254,7 +234,23 @@ public class CosmoServiceClient implements Serializable {
         return mToken;
     }
 
-    private ArrayList<MonthData> parseHTMLResponse(String response) {
+    private String parseResponse(String response) {
+        String[] params = response.split("\\|", -1);
+
+        try {
+            Integer errorCode = Integer.parseInt(params[0]);
+
+            if (errorCode != 0) {
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        return params[1];
+    }
+
+    private ArrayList<MonthData> parseMeterHistoryResponse(String response) {
         Document doc = Jsoup.parse(response);
 
         Elements data = doc.select("tr");
@@ -270,29 +266,11 @@ public class CosmoServiceClient implements Serializable {
             try {
                 allMonthsData.add(new MonthData(date, new BigDecimal(valueString.replaceAll(",", ""))));
             } catch(NumberFormatException e) {
-                System.out.println("string is: " + valueString);
+                Log.d(TAG, "Number format exception. String is " + valueString);
             }
         }
 
         return allMonthsData;
-    }
-
-    String detectMeterNumber(METER_DATAID key) {
-        switch (key) {
-            case COLD_WATER:
-                return "0";
-
-            case HOT_WATER:
-                return "1";
-
-            case DAY_LIGHT:
-                return "2";
-
-            case NIGHT_LIGHT:
-                return "3";
-        }
-
-        return null;
     }
 
     private void saveCurrentMetersData(final HashMap<METER_DATAID, String> meterIdMap,
@@ -309,10 +287,9 @@ public class CosmoServiceClient implements Serializable {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                if (error.networkResponse != null) {
-                    listener.onError(error.networkResponse.statusCode);
-                } else {
-                    listener.onError(-1);
+                if (listener != null) {
+                    listener.onError(error.networkResponse != null ?
+                            error.networkResponse.statusCode : -1);
                 }
             }
         }) {
@@ -330,6 +307,7 @@ public class CosmoServiceClient implements Serializable {
 
                     BigDecimal value = metersDataMap.get(key);
 
+//                    TODO: заменить BigDecimal(0) на null
                     if (value.equals(new BigDecimal(0))) {
                         params.put(sumpostStr + meterNumberStr, "");
                         params.put(markSaveStr + meterNumberStr, "0");
@@ -349,7 +327,7 @@ public class CosmoServiceClient implements Serializable {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                System.out.println("In MainActivity in headers token = " + mToken);
+                Log.d(TAG, "getHeaders. Token = " + mToken);
                 headers.put("Cookie", "token=" + mToken);
 
                 return headers;
@@ -357,6 +335,24 @@ public class CosmoServiceClient implements Serializable {
         };
 
         mRequestQueue.add(stringRequest);
+    }
+
+    private String detectMeterNumber(METER_DATAID key) {
+        switch (key) {
+            case COLD_WATER:
+                return "0";
+
+            case HOT_WATER:
+                return "1";
+
+            case DAY_LIGHT:
+                return "2";
+
+            case NIGHT_LIGHT:
+                return "3";
+        }
+
+        return null;
     }
 
     public void saveCurrentMetersData(final HashMap<METER_DATAID, BigDecimal> metersData, final SaveDataListener listener) {
@@ -378,6 +374,7 @@ public class CosmoServiceClient implements Serializable {
 
         HashMap<METER_DATAID, BigDecimal> currentMetersData = new HashMap<>();
 
+//        TODO: merge
         Elements data = doc.getElementsByClass("sumpost0");
         for (Element el : data) {
             String valueStr = el.attr("value");
@@ -413,6 +410,7 @@ public class CosmoServiceClient implements Serializable {
         Document doc = Jsoup.parse(response);
         Elements data = doc.getElementsByClass("zzag");
         for (Element el : data) {
+            // TODO: split -> 4th word
             if (el.text().contains("Ввод показаний за")) {
                 return el.text().substring(18);
             }
@@ -442,7 +440,7 @@ public class CosmoServiceClient implements Serializable {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                System.out.println("In MainActivity in headers token = " + mToken);
+                Log.d(TAG, "getHeaders. Token = " + mToken);
                 headers.put("Cookie", "token=" + mToken);
 
                 return headers;
@@ -470,7 +468,7 @@ public class CosmoServiceClient implements Serializable {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                System.out.println("In MainActivity in headers token = " + mToken);
+                Log.d(TAG, "getHeaders. Token = " + mToken);
                 headers.put("Cookie", "token=" + mToken);
 
                 return headers;
@@ -498,7 +496,7 @@ public class CosmoServiceClient implements Serializable {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                System.out.println("In MainActivity in headers token = " + mToken);
+                Log.d(TAG, "getHeaders. Token = " + mToken);
                 headers.put("Cookie", "token=" + mToken);
 
                 return headers;

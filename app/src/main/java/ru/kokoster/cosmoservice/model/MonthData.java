@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.model;
 
 import java.math.BigDecimal;
 

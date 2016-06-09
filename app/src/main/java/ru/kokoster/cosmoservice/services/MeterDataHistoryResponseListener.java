@@ -1,6 +1,8 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.services;
 
 import java.util.ArrayList;
+
+import ru.kokoster.cosmoservice.model.MonthData;
 
 /**
  * Created by kokoster on 22.05.16.

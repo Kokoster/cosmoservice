@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.kokoster.cosmoservice">
+    package="ru.kokoster.cosmoservice">
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -12,7 +12,7 @@
         android:windowSoftInputMode="adjustResize"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".LoadingActivity"
+        <activity android:name=".ui.LoadingActivity"
             android:launchMode="singleTop">
 
             <intent-filter>
@@ -22,11 +22,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity"
+        <activity android:name=".ui.LoginActivity"
             android:launchMode="singleTop">
         </activity>
 
-        <activity android:name=".MainActivity"
+        <activity android:name=".ui.MainActivity"
             android:launchMode="singleTop">
         </activity>
     </application>

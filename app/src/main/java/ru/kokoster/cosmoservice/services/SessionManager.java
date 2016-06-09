@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -17,7 +17,7 @@ public class SessionManager {
     }
 
     public String getCurrentToken() {
-        return mSharedPreferences.getString(TOKEN_KEY, "");
+        return mSharedPreferences.getString(TOKEN_KEY, null);
     }
 
     public void saveCurrentToken(String token) {
@@ -29,6 +29,6 @@ public class SessionManager {
     public void removeCurrentToken() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.remove(TOKEN_KEY);
-        editor.apply();
+        editor.commit();
     }
 }

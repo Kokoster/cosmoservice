@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.services;
 
 /**
  * Created by kokoster on 13.05.16.

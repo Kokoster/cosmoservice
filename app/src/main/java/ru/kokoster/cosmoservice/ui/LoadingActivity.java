@@ -1,56 +1,68 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.ui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+
+import ru.kokoster.cosmoservice.services.CosmoServiceClient;
+import ru.kokoster.cosmoservice.services.ResponseListener;
+import ru.kokoster.cosmoservice.services.SessionManager;
 
 /**
  * Created by kokoster on 03.06.16.
  */
 public class LoadingActivity extends Activity {
+    private static final String TAG = "LoadingActivity";
+
+    private SessionManager mSessionManager;
+    private CosmoServiceClient mCosmoServiceClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.layout_splash);
 
-        SessionManager sessionManager = new SessionManager(getApplicationContext());
-        final String currentToken = sessionManager.getCurrentToken();
+        mSessionManager = new SessionManager(getApplicationContext());
+        final String currentToken = mSessionManager.getCurrentToken();
 
-        if (currentToken.equals("")) {
-            createLoginActivity();
+        if (currentToken == null) {
+            startLoginActivity();
         }
 
-        System.out.println("In Splash Activity. Current token = " + currentToken);
+        Log.d(TAG, "Current token = " + currentToken);
 
-        CosmoServiceClient cosmoServiceClient = new CosmoServiceClient(getCacheDir());
-        cosmoServiceClient.checkToken(currentToken, new ResponseListener() {
+        mCosmoServiceClient = new CosmoServiceClient(getCacheDir());
+        mCosmoServiceClient.checkToken(currentToken, new ResponseListener() {
             @Override
             public void onSuccess() {
-                createMainActivity(currentToken);
+                startMainActivity(currentToken);
             }
 
             @Override
             public void onError(int errorCode) {
-                createLoginActivity();
+                startLoginActivity();
             }
         });
     }
 
-    private void createLoginActivity() {
+    private void startLoginActivity() {
         Intent loginActivityIntent = new Intent(this, LoginActivity.class);
         loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(loginActivityIntent);
+
         overridePendingTransition(0,0);
         finish();
     }
 
-    private void createMainActivity(String currentToken) {
+    private void startMainActivity(String currentToken) {
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         mainActivityIntent.putExtra("token", currentToken);
         mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(mainActivityIntent);
+
         overridePendingTransition(0,0);
         finish();
     }

@@ -12,8 +12,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="500dp">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -31,7 +30,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Холодная вода"
+                android:text="Хол. вода"
                 android:id="@+id/cold_water_label"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="false"
@@ -47,7 +46,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Горячая вода"
+                android:text="Гор. вода"
                 android:id="@+id/hot_water_label"
                 android:layout_below="@+id/cold_water_label"
                 android:layout_alignStart="@+id/cold_water_label"
@@ -86,19 +85,24 @@
                 android:layout_marginBottom="16dp" />
 
             <EditText
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/cold_water_edit"
-                android:layout_alignBottom="@+id/cold_water_label"
-                android:layout_toRightOf="@+id/cold_water_label"
+                android:gravity="right"
                 android:layout_toEndOf="@+id/cold_water_label"
-                android:layout_marginLeft="41dp"
+                android:layout_marginLeft="40dp"
                 android:layout_marginStart="41dp"
                 android:layout_alignTop="@+id/cold_water_label"
-                android:width="100dp"
                 android:textColor="@android:color/primary_text_light"
                 android:textSize="16sp"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                android:layout_alignBottom="@+id/cold_water_label"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="40dp"
+                android:layout_toRightOf="@+id/cold_water_label"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="false" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -112,6 +116,7 @@
                 android:layout_alignBottom="@+id/hot_water_label"
                 android:layout_alignRight="@+id/cold_water_edit"
                 android:textSize="16sp"
+                android:gravity="right"
                 android:inputType="numberDecimal" />
 
             <EditText
@@ -126,6 +131,7 @@
                 android:layout_alignBottom="@+id/day_light_label"
                 android:layout_alignRight="@+id/hot_water_edit"
                 android:textSize="16sp"
+                android:gravity="right"
                 android:inputType="numberDecimal" />
 
             <EditText
@@ -140,6 +146,7 @@
                 android:layout_alignBottom="@+id/night_light_label"
                 android:layout_alignRight="@+id/day_light_edit"
                 android:textSize="16sp"
+                android:gravity="right"
                 android:inputType="numberDecimal" />
 
             <RelativeLayout
@@ -154,7 +161,7 @@
                     android:textColor="@color/colorButtonText"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="сохранить"
+                    android:text="СОХРАНИТЬ"
                     android:id="@+id/save_button"
                     android:layout_centerVertical="true"
                     android:textSize="16sp"
@@ -192,8 +199,22 @@
                 android:layout_alignRight="@+id/button_layout"
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
+                android:layout_marginBottom="10dp"
                 android:visibility="invisible">
             </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/textView"
+                android:layout_alignTop="@+id/cold_water_label"
+                android:layout_alignBottom="@+id/cold_water_label"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_toRightOf="@+id/cold_water_label"
+                android:layout_toLeftOf="@+id/cold_water_edit"
+                android:minWidth="30dp" />
         </RelativeLayout>
      </ScrollView>
 </RelativeLayout>

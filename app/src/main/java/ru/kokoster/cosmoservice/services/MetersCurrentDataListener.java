@@ -1,7 +1,9 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.services;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+
+import ru.kokoster.cosmoservice.services.CosmoServiceClient;
 
 /**
  * Created by kokoster on 24.05.16.

@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,13 +10,16 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import ru.kokoster.cosmoservice.R;
+
 /**
  * Created by kokoster on 28.05.16.
  */
 public class MetersHistoryFragment extends Fragment {
-    private View mHistoryView = null;
-    private ArrayList<ArrayList<String>> mMetersHistory = null;
+    private View mHistoryView;
+    private ArrayList<ArrayList<String>> mMetersHistory;
     private View mListHeaderView;
+    private ListView mListView;
 
     public static MetersHistoryFragment newInstance() {
         MetersHistoryFragment fragment = new MetersHistoryFragment();
@@ -36,35 +39,14 @@ public class MetersHistoryFragment extends Fragment {
 
         mListHeaderView = inflater.inflate(
                 R.layout.meter_list_item, null);
+        fillHeader();
 
         updateView(mMetersHistory);
 
+        mListView = (ListView) mHistoryView.findViewById(R.id.metersList);
+        mListView.addHeaderView(mListHeaderView);
+
         return mHistoryView;
-    }
-
-    private void updateView(ArrayList<ArrayList<String>> metersHistory) {
-        // adapter -> map -> set to list
-        if (mHistoryView == null) {
-            return;
-        }
-
-        if (metersHistory == null) {
-            return;
-        }
-
-        ListView listView = (ListView) mHistoryView.findViewById(R.id.metersList);
-
-        if (listView == null) {
-            return;
-        }
-
-        int viewResourceID = com.example.kokoster.cosmoservice.R.layout.meter_list_item;
-
-        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(mHistoryView.getContext(), viewResourceID, metersHistory);
-
-        listView.setAdapter(adapter);
-        listView.addHeaderView(createHeader());
-        listView.setVisibility(View.VISIBLE);
     }
 
     public void setMetersHistory(ArrayList<ArrayList<String>> metersHistory) {
@@ -72,11 +54,27 @@ public class MetersHistoryFragment extends Fragment {
         updateView(metersHistory);
     }
 
+    private void updateView(ArrayList<ArrayList<String>> metersHistory) {
+        // adapter -> map -> set to list
+        if (mHistoryView == null || metersHistory == null) {
+            return;
+        }
 
-    // TODO: createHeader(inflater) or member?
-    private View createHeader() {
+        if (mListView == null) {
+            return;
+        }
+
+        int viewResourceID = ru.kokoster.cosmoservice.R.layout.meter_list_item;
+
+        final MeterDataArrayAdapter adapter = new MeterDataArrayAdapter(mHistoryView.getContext(), viewResourceID, metersHistory);
+
+        mListView.setAdapter(adapter);
+        mListView.setVisibility(View.VISIBLE);
+    }
+
+    private void fillHeader() {
         if (mHistoryView == null || mListHeaderView == null) {
-            return null;
+            return;
         }
 
         TextView dateTextView = (TextView) mListHeaderView.findViewById(R.id.date_text);
@@ -90,7 +88,5 @@ public class MetersHistoryFragment extends Fragment {
         hotWaterTextView.setText("Гор (м3)");
         dayLightTextView.setText("День (кВт)");
         nightLightTextView.setText("Ночь (кВт)");
-
-        return mListHeaderView;
     }
 }

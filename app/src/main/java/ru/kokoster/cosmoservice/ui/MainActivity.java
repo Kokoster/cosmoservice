@@ -1,4 +1,4 @@
-package com.example.kokoster.cosmoservice;
+package ru.kokoster.cosmoservice.ui;
 
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,7 +19,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+import ru.kokoster.cosmoservice.model.MonthData;
+import ru.kokoster.cosmoservice.R;
+import ru.kokoster.cosmoservice.services.CosmoServiceClient;
+import ru.kokoster.cosmoservice.services.MeterDataHistoryResponseListener;
+import ru.kokoster.cosmoservice.services.MonthRequestListener;
+import ru.kokoster.cosmoservice.services.SessionManager;
+
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
     private CosmoServiceClient mCosmoServiceClient;
     private HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> mMeterData;
     private Toolbar mToolbar;
@@ -27,19 +37,18 @@ public class MainActivity extends AppCompatActivity {
 
     private MetersHistoryFragment mMeterHistoryFragment;
     private EditCurrentDataFragment mCurrentDataFragment;
+    private SessionManager mSessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.example.kokoster.cosmoservice.R.layout.activity_main);
+        setContentView(ru.kokoster.cosmoservice.R.layout.activity_main);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (mToolbar != null) {
-            mToolbar.showOverflowMenu();
-        }
-
+        mToolbar.showOverflowMenu();
         setSupportActionBar(mToolbar);
 
+//        TODO: не передавать токен явно
         String token;
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -52,9 +61,11 @@ public class MainActivity extends AppCompatActivity {
             token = (String) savedInstanceState.getSerializable("token");
         }
 
-        System.out.println("In MainActivity token = " + token);
+        Log.d(TAG, "onCreate. token = " + token);
 
         mCosmoServiceClient = new CosmoServiceClient(this.getCacheDir(), token);
+
+        mSessionManager = new SessionManager(MainActivity.this.getApplicationContext());
 
         mMeterHistoryFragment = MetersHistoryFragment.newInstance();
         mCurrentDataFragment = EditCurrentDataFragment.newInstance(mCosmoServiceClient);
@@ -81,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(int errorCode) {
-                System.out.println("retrieveCurrentMonth failed with " + Integer.toString(errorCode) + " error code");
+                Log.d(TAG, "retrieveCurrentMonth failed with " + Integer.toString(errorCode) + " error code");
             }
         });
     }
@@ -97,10 +108,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.log_out:
-                SessionManager sessionManager = new SessionManager(MainActivity.this.getApplicationContext());
-                sessionManager.removeCurrentToken();
-
-                createLoginActivity();
+                mSessionManager.removeCurrentToken();
+                startLoginActivity();
 
                 break;
         }
@@ -114,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             mMeterData.put(dataId, allMonths);
 
             if (allMeterDataRetreived()) {
-                System.out.println("In MainActivity. All meter data retreived");
+                Log.d(TAG, "All meter data retrieved");
 
                 mMeterHistoryFragment.setMetersHistory(createListFromMap(mMeterData));
             }
@@ -122,17 +131,23 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onError(CosmoServiceClient.METER_DATAID dataId, int errorCode) {
-            System.out.println("Failed to retrieve meter history, dataid: " + dataId + ", error: " + Integer.toString(errorCode));
+            Log.d(TAG, "Failed to retrieve meter history, dataid: " + dataId + ", error: " + Integer.toString(errorCode));
         }
     }
 
+    private boolean allMeterDataRetreived() {
+        return mMeterData.size() == 4;
+    }
+
     private ArrayList<ArrayList<String>> createListFromMap(HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> historyData) {
+//        TODO: подумать над структурами данных: data, historyData
+//        TODO: создать класс для данных
         ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         int size = getMax(historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).size(),
-                historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).size(),
-                historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).size(),
-                historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).size());
+                          historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).size(),
+                          historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).size(),
+                          historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).size());
 
         for (int i = 0; i < size; ++i) {
             ArrayList<String> row = new ArrayList<>();
@@ -143,29 +158,10 @@ public class MainActivity extends AppCompatActivity {
                 row.add(historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).get(i).date);
             }
 
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.COLD_WATER).get(i).value.toString());
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.HOT_WATER).get(i).value.toString());
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.DAY_LIGHT).get(i).value.toString());
-            }
-
-            if (i >= historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).size()) {
-                row.add("");
-            } else {
-                row.add(historyData.get(CosmoServiceClient.METER_DATAID.NIGHT_LIGHT).get(i).value.toString());
-            }
+            row.add(getMeterValue(historyData, CosmoServiceClient.METER_DATAID.COLD_WATER, i));
+            row.add(getMeterValue(historyData, CosmoServiceClient.METER_DATAID.HOT_WATER, i));
+            row.add(getMeterValue(historyData, CosmoServiceClient.METER_DATAID.DAY_LIGHT, i));
+            row.add(getMeterValue(historyData, CosmoServiceClient.METER_DATAID.NIGHT_LIGHT, i));
 
             data.add(row);
         }
@@ -173,12 +169,17 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
 
-    private int getMax(Integer ... meters) {
-        return Collections.max(new ArrayList<Integer>(Arrays.asList(meters)));
+    private String getMeterValue(HashMap<CosmoServiceClient.METER_DATAID, ArrayList<MonthData>> historyData,
+                                 CosmoServiceClient.METER_DATAID dataId, int position) {
+        if (position >= historyData.get(dataId).size()) {
+            return "";
+        }
+
+        return historyData.get(dataId).get(position).value.toString();
     }
 
-    private boolean allMeterDataRetreived() {
-        return mMeterData.size() == 4;
+    private int getMax(Integer ... meters) {
+        return Collections.max(new ArrayList<>(Arrays.asList(meters)));
     }
 
     private void createBottomBar(Bundle savedInstanceState) {
@@ -188,26 +189,26 @@ public class MainActivity extends AppCompatActivity {
         bottomBar.setItemsFromMenu(R.menu.bottom_bar_menu, new OnMenuTabSelectedListener() {
             @Override
             public void onMenuItemSelected(int itemId) {
-                switch (itemId) {
-                    case R.id.meters_history:
-                        FragmentTransaction historyFragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        historyFragmentTransaction.replace(R.id.fragment_container, mMeterHistoryFragment);
-                        historyFragmentTransaction.commit();
+            switch (itemId) {
+                case R.id.meters_history:
+                    FragmentTransaction historyFragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    historyFragmentTransaction.replace(R.id.fragment_container, mMeterHistoryFragment);
+                    historyFragmentTransaction.commit();
 
-                        break;
+                    break;
 
-                    case R.id.edit_current:
-                        FragmentTransaction editFragmentTransaction = getSupportFragmentManager().beginTransaction();
-                        editFragmentTransaction.replace(R.id.fragment_container, mCurrentDataFragment);
-                        editFragmentTransaction.commit();
+                case R.id.edit_current:
+                    FragmentTransaction editFragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    editFragmentTransaction.replace(R.id.fragment_container, mCurrentDataFragment);
+                    editFragmentTransaction.commit();
 
-                        break;
-                }
+                    break;
+            }
             }
         });
     }
 
-    private void createLoginActivity() {
+    private void startLoginActivity() {
         Intent loginActivityIntent = new Intent(this, LoginActivity.class);
         loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_NO_ANIMATION);
